@@ -720,39 +720,49 @@
 
     // What happens when you upload an image file
 function scanUploadedImage(event) {
-const file = event.target.files[0];
-if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-showToast("⏳ Scanning image...", "warning");
+    showToast("⏳ Scanning image...", "warning");
 
-// We MUST stop the live camera feed before analyzing a static file
-if (html5QrCode && html5QrCode.isScanning) {
-    html5QrCode.stop().then(() => {
+    // CRITICAL FIX 1: More robust camera check for desktop browsers.
+    // Some desktop browsers don't register .isScanning reliably, so we check the internal state too.
+    const isCameraRunning = html5QrCode && (html5QrCode.isScanning || (typeof html5QrCode.getState === 'function' && html5QrCode.getState() === 2));
+
+    if (isCameraRunning) {
+        html5QrCode.stop().then(() => {
+            processFile(file);
+        }).catch(err => {
+            console.error("Camera stop error:", err);
+            processFile(file); // Try processing anyway if the camera refuses to stop
+        });
+    } else {
         processFile(file);
-    }).catch(err => console.log(err));
-} else {
-    processFile(file);
+    }
+
+    // Reset the file input so you can upload the same image again if needed
+    event.target.value = "";
 }
 
-// Reset the file input so you can upload the same image again if needed
-event.target.value = "";
-}
-
-// Helper function to process the file after the camera safely stops
+// Helper function to process the file
 function processFile(file) {
     if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
-}
+        html5QrCode = new Html5Qrcode("reader");
+    }
 
-html5QrCode.scanFile(file, true)
-    .then(decodedText => {
-        onScanSuccess(decodedText, null);
-    })
-    .catch(err => {
-        showToast("⚠️ No clear QR code found in that image.", "warning");
-        // Turn the live camera back on since the file upload failed
-        switchTab('scan');
-    });
+    // CRITICAL FIX 2: Changed 'true' to 'false'.
+    // This forces the app to read the image in background memory instead of fighting 
+    // the webcam to draw the image on the screen. This solves the desktop bug.
+    html5QrCode.scanFile(file, false)
+        .then(decodedText => {
+            onScanSuccess(decodedText, null);
+        })
+        .catch(err => {
+            console.error("File scan error:", err);
+            showToast("⚠️ No clear QR code found in that image.", "warning");
+            // Turn the live camera back on since the file upload failed
+            switchTab('scan');
+        });
 }
 
     function updateQRCodeSettings() {
