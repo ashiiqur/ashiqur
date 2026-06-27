@@ -720,49 +720,39 @@
 
     // What happens when you upload an image file
 function scanUploadedImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+const file = event.target.files[0];
+if (!file) return;
 
-    showToast("⏳ Scanning image...", "warning");
+showToast("⏳ Scanning image...", "warning");
 
-    // Step 1: Forcefully stop the camera if it is running
-    if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-            executeFileScan(file);
-        }).catch(() => {
-            executeFileScan(file); // Proceed anyway if the camera refuses to stop
-        });
-    } else {
-        executeFileScan(file);
-    }
-
-    // Reset the file input so you can upload the same image again if needed
-    event.target.value = "";
+// We MUST stop the live camera feed before analyzing a static file
+if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().then(() => {
+        processFile(file);
+    }).catch(err => console.log(err));
+} else {
+    processFile(file);
 }
 
-// Step 2: The Nuclear Reset & Scan
-function executeFileScan(file) {
-    // Completely destroy the old scanner and wipe the HTML to unlock browser memory
-    if (html5QrCode) {
-        try { html5QrCode.clear(); } catch(e) {}
-    }
-    document.getElementById("reader").innerHTML = ""; 
-    
-    // Build a brand new, clean instance specifically for this file
-    html5QrCode = new Html5Qrcode("reader");
+// Reset the file input so you can upload the same image again if needed
+event.target.value = "";
+}
 
-    // Scan the file directly in the background (false = do not render to screen)
-    html5QrCode.scanFile(file, false)
-        .then(decodedText => {
-            onScanSuccess(decodedText, null);
-        })
-        .catch(err => {
-            console.error("Scan error:", err);
-            showToast("⚠️ No QR found. (Ensure it has a solid background!)", "warning");
-            
-            // Reboot the live camera since the file scan failed
-            setTimeout(() => { switchTab('scan'); }, 500); 
-        });
+// Helper function to process the file after the camera safely stops
+function processFile(file) {
+    if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+}
+
+html5QrCode.scanFile(file, true)
+    .then(decodedText => {
+        onScanSuccess(decodedText, null);
+    })
+    .catch(err => {
+        showToast("⚠️ No clear QR code found in that image.", "warning");
+        // Turn the live camera back on since the file upload failed
+        switchTab('scan');
+    });
 }
 
     function updateQRCodeSettings() {
