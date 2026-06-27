@@ -725,16 +725,20 @@ function scanUploadedImage(event) {
 
     showToast("⏳ Scanning image...", "warning");
 
-    // CRITICAL FIX 1: More robust camera check for desktop browsers.
-    // Some desktop browsers don't register .isScanning reliably, so we check the internal state too.
     const isCameraRunning = html5QrCode && (html5QrCode.isScanning || (typeof html5QrCode.getState === 'function' && html5QrCode.getState() === 2));
 
     if (isCameraRunning) {
+        // Stop camera, clear the UI, and wait a tiny bit before processing the file
         html5QrCode.stop().then(() => {
-            processFile(file);
+            try { 
+                html5QrCode.clear(); // Wipes the camera view entirely 
+            } catch(e) { } 
+            
+            // 250ms delay gives desktop browsers time to free up the canvas memory
+            setTimeout(() => { processFile(file); }, 250); 
         }).catch(err => {
-            console.error("Camera stop error:", err);
-            processFile(file); // Try processing anyway if the camera refuses to stop
+            // If stopping fails, try anyway after a delay
+            setTimeout(() => { processFile(file); }, 250);
         });
     } else {
         processFile(file);
@@ -750,18 +754,20 @@ function processFile(file) {
         html5QrCode = new Html5Qrcode("reader");
     }
 
-    // CRITICAL FIX 2: Changed 'true' to 'false'.
-    // This forces the app to read the image in background memory instead of fighting 
-    // the webcam to draw the image on the screen. This solves the desktop bug.
+    // scanFile(file, showImage) -> setting showImage to false prevents canvas crashing
     html5QrCode.scanFile(file, false)
         .then(decodedText => {
             onScanSuccess(decodedText, null);
         })
         .catch(err => {
-            console.error("File scan error:", err);
-            showToast("⚠️ No clear QR code found in that image.", "warning");
-            // Turn the live camera back on since the file upload failed
-            switchTab('scan');
+            console.error("Scan failed:", err);
+            showToast("⚠️ Could not read QR. Is the background transparent?", "warning");
+            
+            // Only restart the camera if they are still on the scanner tab
+            if (document.getElementById('scanner-view').style.display === 'block') {
+                // Add a small delay before restarting camera to prevent crashing
+                setTimeout(() => { switchTab('scan'); }, 500);
+            }
         });
 }
 
