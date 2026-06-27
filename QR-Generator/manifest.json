@@ -1,10 +1,10 @@
 {
-  "name": "QR Generator App",
-  "short_name": "QR Gen",
+  "name": "QR Generator",
+  "short_name": "QR Generator",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#FF7F50",
+  "theme_color": "#7DD3FC", 
   "icons": [
     {
       "src": "Icon.png",
