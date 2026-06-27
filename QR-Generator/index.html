@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <link rel="icon" type="image/png" href="Icon.png">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF7F50">
+    
     <title>QR Generator</title>
     <script src="js/qr-code-styling.js"></script>
 <script src="js/html5-qrcode.min.js"></script>
@@ -901,6 +905,15 @@ html5QrCode.scanFile(file, true)
         // LEAVE THIS COMPLETELY EMPTY!
         // Logging errors here happens 10x a second and will flood memory, crashing the app.
     }
+
+    // Register the service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered!', reg))
+                    .catch(err => console.error('Service Worker Registration Failed!', err));
+            });
+        }
 </script>
 
 </body>
