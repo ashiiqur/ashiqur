@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code to WAV Synthesizer</title>
+    <title>Premium Code to WAV Synthesizer</title>
     <style>
         :root {
-            /* Changed to pure black */
-            --bg-color: #000000; 
-            --container-bg: #111827;
-            --primary: #3b82f6;
-            --hover: #2563eb;
+            /* Premium Rich Gradient Colors */
+            --primary: #8b5cf6; /* Vibrant Purple */
+            --hover: #7c3aed;
             --success: #10b981;
             --success-hover: #059669;
             --text-main: #f8fafc;
-            --code-text: #38bdf8;
+            --code-text: #67e8f9; /* Soft Cyan for code */
         }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
             color: var(--text-main);
             display: flex;
             flex-direction: column;
@@ -29,9 +26,54 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            /* Hide body overflow if shapes go out of bounds */
+            overflow-x: hidden; 
         }
 
-        /* Animated Typing Header */
+        /* --- Animated Background Shapes --- */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); /* Premium Dark Indigo */
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            display: block;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(2px);
+            animation: fall linear infinite;
+            pointer-events: none; /* Allows clicking through the shapes */
+            bottom: 100%; /* Start above the screen */
+        }
+
+        /* Individual shapes (Mixed squares, circles, and CSS triangles) */
+        .shape:nth-child(1) { left: 10%; width: 80px; height: 80px; animation-duration: 15s; animation-delay: 0s; }
+        .shape:nth-child(2) { left: 25%; width: 30px; height: 30px; border-radius: 50%; animation-duration: 12s; animation-delay: 2s; }
+        .shape:nth-child(3) { left: 40%; width: 60px; height: 60px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); animation-duration: 18s; animation-delay: 4s; }
+        .shape:nth-child(4) { left: 60%; width: 45px; height: 45px; border-radius: 50%; animation-duration: 14s; animation-delay: 0s; }
+        .shape:nth-child(5) { left: 75%; width: 90px; height: 90px; animation-duration: 20s; animation-delay: 3s; }
+        .shape:nth-child(6) { left: 85%; width: 50px; height: 50px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); animation-duration: 16s; animation-delay: 1s; }
+        .shape:nth-child(7) { left: 15%; width: 25px; height: 25px; animation-duration: 11s; animation-delay: 5s; }
+        .shape:nth-child(8) { left: 50%; width: 70px; height: 70px; border-radius: 50%; animation-duration: 19s; animation-delay: 7s; }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-150px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg); /* Falls past the screen and spins */
+                opacity: 0;
+            }
+        }
+
+        /* --- Animated Typing Header --- */
         .header-container {
             margin-bottom: 25px;
             display: flex;
@@ -40,13 +82,14 @@
         }
 
         .typing-text {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             border-right: 3px solid var(--primary);
             white-space: nowrap;
             overflow: hidden;
             width: 0;
             animation: typing 2.5s steps(30, end) forwards, blink 0.8s step-end infinite;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
         @keyframes typing {
@@ -58,45 +101,50 @@
             50% { border-color: var(--primary); }
         }
 
-        /* Editor Layout */
+        /* --- Premium Glassmorphism Editor Layout --- */
         .editor-container {
-            background: var(--container-bg);
+            background: rgba(17, 24, 39, 0.45); /* Semi-transparent */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle glass edge */
             padding: 24px;
-            border-radius: 12px;
-            border: 1px solid #1f2937;
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1); /* Subtle blue glow on black bg */
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             width: 100%;
             max-width: 700px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            z-index: 10;
         }
 
         label {
             font-size: 14px;
-            color: #94a3b8;
+            color: #cbd5e1;
             font-weight: 600;
         }
 
         textarea {
             width: 100%;
             height: 280px;
-            background: #030712;
+            background: rgba(0, 0, 0, 0.5); /* Very dark transparent background for code */
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 14px;
             padding: 15px;
-            border: 1px solid #334155;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             resize: vertical;
             outline: none;
             box-sizing: border-box;
             line-height: 1.5;
+            transition: all 0.3s;
         }
 
         textarea:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            background: rgba(0, 0, 0, 0.7);
         }
 
         /* Interactive Buttons */
@@ -108,7 +156,7 @@
         }
 
         button {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--hover));
             color: white;
             border: none;
             padding: 12px 24px;
@@ -117,12 +165,12 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
         }
 
         button:hover {
-            background: var(--hover);
             transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
         }
 
         button:active {
@@ -130,12 +178,12 @@
         }
 
         #download-btn {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success), var(--success-hover));
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
         #download-btn:hover {
-            background: var(--success-hover);
-            box-shadow: 0 8px 15px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
         }
 
         #status {
@@ -145,12 +193,12 @@
 
         /* Preview Interface Section */
         #preview-section {
-            display: none; /* Hidden until generated */
+            display: none; 
             flex-direction: column;
             gap: 15px;
             margin-top: 10px;
             padding-top: 20px;
-            border-top: 1px solid #334155;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             animation: fadeIn 0.5s ease;
         }
 
@@ -163,10 +211,11 @@
             width: 100%;
             border-radius: 8px;
             outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
         audio::-webkit-media-controls-panel {
-            background-color: #1f2937;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
         audio::-webkit-media-controls-current-time-display,
@@ -177,6 +226,21 @@
 </head>
 <body>
 
+    <!-- Falling Shapes Background -->
+    <div class="bg-animation">
+        <ul style="padding:0; margin:0;">
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+            <li class="shape"></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
     <div class="header-container">
         <div class="typing-text">Code to WAV Converter</div>
     </div>
@@ -212,7 +276,6 @@ freqs.forEach((freq, index) => {
             <button onclick="generatePreview()">Generate Preview</button>
         </div>
 
-        <!-- NEW: Preview and Download Section -->
         <div id="preview-section">
             <label>Preview Generated Audio:</label>
             <audio id="audio-player" controls></audio>
@@ -224,7 +287,7 @@ freqs.forEach((freq, index) => {
     </div>
 
     <script>
-        let currentAudioUrl = null; // Memory to hold the generated audio file
+        let currentAudioUrl = null; 
 
         async function generatePreview() {
             const statusDiv = document.getElementById('status');
@@ -232,44 +295,35 @@ freqs.forEach((freq, index) => {
             const previewSection = document.getElementById('preview-section');
             const audioPlayer = document.getElementById('audio-player');
             
-            // Hide previous preview while processing
             previewSection.style.display = 'none';
-            statusDiv.style.color = '#38bdf8';
+            statusDiv.style.color = 'var(--code-text)';
             statusDiv.innerText = "Processing...";
 
             try {
-                // Set up the Offline Audio Environment (2 seconds long)
                 const duration = 2.0;
                 const sampleRate = 44100;
                 const offlineCtx = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
                 const now = offlineCtx.currentTime;
 
-                // Execute the user's code safely inside this specific function scope
                 const userFunction = new Function('offlineCtx', 'now', userCode);
                 userFunction(offlineCtx, now);
 
-                // Render the audio
                 const renderedBuffer = await offlineCtx.startRendering();
-                
-                // Convert to WAV
                 const wavBlob = bufferToWav(renderedBuffer);
                 
-                // Cleanup the old memory URL if the user clicks generate multiple times
                 if (currentAudioUrl) {
                     URL.revokeObjectURL(currentAudioUrl);
                 }
 
-                // Create new URL and set it to the audio player
                 currentAudioUrl = URL.createObjectURL(wavBlob);
                 audioPlayer.src = currentAudioUrl;
                 
-                // Reveal the player and download button
                 previewSection.style.display = 'flex';
-                statusDiv.innerText = ""; // Clear processing text
+                statusDiv.innerText = ""; 
 
             } catch (error) {
                 console.error(error);
-                statusDiv.style.color = '#ef4444'; /* Red error color */
+                statusDiv.style.color = '#ef4444'; 
                 statusDiv.innerText = "❌ Error in your code. Check console.";
             }
         }
@@ -283,7 +337,6 @@ freqs.forEach((freq, index) => {
             a.click();
         }
 
-        // Standard function to encode a raw audio buffer into a playable WAV file
         function bufferToWav(abuffer) {
             let numOfChan = abuffer.numberOfChannels;
             let length = abuffer.length * numOfChan * 2 + 44;
@@ -294,20 +347,20 @@ freqs.forEach((freq, index) => {
             function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
             function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
 
-            setUint32(0x46464952); // "RIFF"
-            setUint32(length - 8); // file length - 8
-            setUint32(0x45564157); // "WAVE"
-            setUint32(0x20746d66); // "fmt " chunk
-            setUint32(16);         // length = 16
-            setUint16(1);          // PCM (uncompressed)
+            setUint32(0x46464952); 
+            setUint32(length - 8); 
+            setUint32(0x45564157); 
+            setUint32(0x20746d66); 
+            setUint32(16);         
+            setUint16(1);          
             setUint16(numOfChan);
             setUint32(abuffer.sampleRate);
-            setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
-            setUint16(numOfChan * 2); // block-align
-            setUint16(16);         // 16-bit
+            setUint32(abuffer.sampleRate * 2 * numOfChan); 
+            setUint16(numOfChan * 2); 
+            setUint16(16);         
 
-            setUint32(0x61746164); // "data" - chunk
-            setUint32(length - pos - 4); // chunk length
+            setUint32(0x61746164); 
+            setUint32(length - pos - 4); 
 
             for(let i = 0; i < abuffer.numberOfChannels; i++) {
                 channels.push(abuffer.getChannelData(i));
@@ -315,8 +368,8 @@ freqs.forEach((freq, index) => {
 
             while(pos < length) {
                 for(let i = 0; i < numOfChan; i++) {
-                    sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit
+                    sample = Math.max(-1, Math.min(1, channels[i][offset])); 
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; 
                     view.setInt16(pos, sample, true); 
                     pos += 2;
                 }
