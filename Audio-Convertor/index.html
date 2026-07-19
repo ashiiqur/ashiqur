@@ -359,57 +359,35 @@
             </div>
         </div>
         
-        <!-- Pre-loaded with the 10-Second Sci-Fi Sweep! -->
+        <!-- Pre-loaded with the original 2-Second Arpeggio -->
         <textarea id="code-input" spellcheck="false">
-// 10-Second Sci-Fi Ambient Sweep
-const osc = offlineCtx.createOscillator();
-const lfo = offlineCtx.createOscillator();
-const filter = offlineCtx.createBiquadFilter();
-const gainNode = offlineCtx.createGain();
+// This code generates a soft C Major Chord arpeggio
+const freqs = [523.25, 659.25, 783.99, 1046.50];
 
-// Main sound source
-osc.type = 'sawtooth';
-osc.frequency.setValueAtTime(110, now);
-osc.frequency.exponentialRampToValueAtTime(880, now + 10); 
+freqs.forEach((freq, index) => {
+    const osc = offlineCtx.createOscillator();
+    const gainNode = offlineCtx.createGain();
 
-// LFO to create a pulsating effect
-lfo.type = 'sine';
-lfo.frequency.setValueAtTime(2, now); 
-lfo.frequency.linearRampToValueAtTime(15, now + 10);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now + (index * 0.05));
 
-const lfoGain = offlineCtx.createGain();
-lfoGain.gain.setValueAtTime(500, now); 
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
 
-// Filter
-filter.type = 'lowpass';
-filter.frequency.setValueAtTime(400, now);
-filter.Q.setValueAtTime(15, now); 
+    osc.connect(gainNode);
+    gainNode.connect(offlineCtx.destination);
 
-// Volume Envelope
-gainNode.gain.setValueAtTime(0, now);
-gainNode.gain.linearRampToValueAtTime(0.1, now + 2); 
-gainNode.gain.setValueAtTime(0.1, now + 8);          
-gainNode.gain.linearRampToValueAtTime(0, now + 10);  
-
-// Connect Nodes
-lfo.connect(lfoGain);
-lfoGain.connect(filter.frequency);
-osc.connect(filter);
-filter.connect(gainNode);
-gainNode.connect(offlineCtx.destination);
-
-// Play
-lfo.start(now);
-osc.start(now);
-lfo.stop(now + 10);
-osc.stop(now + 10);
+    osc.start(now + (index * 0.05));
+    osc.stop(now + 0.8 + (index * 0.05));
+});
 </textarea>
 
-        <!-- NEW: Generation Controls layout with Duration Input -->
+        <!-- Generation Controls layout with Duration Input set to 2 -->
         <div class="generation-controls">
             <div class="duration-input-group">
                 <label for="audio-duration">Duration (sec):</label>
-                <input type="number" id="audio-duration" value="10" min="1" max="600">
+                <input type="number" id="audio-duration" value="2" min="1" max="600">
             </div>
             
             <div class="btn-group">
@@ -471,7 +449,6 @@ osc.stop(now + 10);
             const previewSection = document.getElementById('preview-section');
             
             // DYNAMIC DURATION LOGIC
-            // Reads the number from the UI input box, defaults to 2 seconds if invalid
             let uiDuration = parseFloat(document.getElementById('audio-duration').value);
             if (isNaN(uiDuration) || uiDuration <= 0) uiDuration = 2.0;
 
@@ -481,7 +458,6 @@ osc.stop(now + 10);
 
             try {
                 const sampleRate = 44100;
-                // Uses the dynamically entered duration instead of a hardcoded value
                 const offlineCtx = new OfflineAudioContext(1, sampleRate * uiDuration, sampleRate);
                 const now = offlineCtx.currentTime;
 
