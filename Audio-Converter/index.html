@@ -7,7 +7,7 @@
     <title>Audio Converter</title>
     <style>
         /* Base layer locked to dark to prevent white flashes */
-        html, body {
+        html {
             background-color: #0f0c29; 
         }
 
@@ -50,6 +50,8 @@
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden; 
+            /* Ensure body is transparent so the animation shows */
+            background-color: transparent; 
         }
 
         /* --- Animated Background Shapes --- */
@@ -59,9 +61,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1;
+            /* FIX: Brought to 0 so it sits above the HTML base background but behind the app */
+            z-index: 0;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); 
             overflow: hidden;
+            pointer-events: none;
         }
 
         .shape {
@@ -151,6 +155,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            z-index: 1001; /* ensures button stays clickable over menu */
         }
 
         .nav-right-btn svg {
@@ -188,6 +194,7 @@
             transform: translateY(-10px) scale(0.95);
             transition: all 0.3s cubic-bezier(0.3, 0, 0.2, 1);
             transform-origin: top right;
+            z-index: 1000;
         }
 
         /* Active State Properties */
@@ -242,7 +249,7 @@
 
         /* --- LIQUID GLASS EDITOR LAYOUT --- */
         .editor-container {
-            background: linear-gradient(135deg, rgba(20, 25, 40, 0.6) 0%, rgba(10, 15, 25, 0.4) 100%);
+            background: rgba(20, 25, 40, 0.3);
             backdrop-filter: blur(24px) saturate(120%);
             -webkit-backdrop-filter: blur(24px) saturate(120%);
             border: 1px solid rgba(255, 255, 255, 0.08); 
@@ -303,7 +310,7 @@
         textarea {
             width: 100%;
             height: 380px;
-            background: rgba(0, 0, 0, 0.35); 
+            background: rgba(0, 0, 0, 0.2); 
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 14px;
@@ -321,7 +328,7 @@
         textarea:focus {
             border-color: var(--primary);
             box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(139, 92, 246, 0.3);
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
         }
 
         /* Clean Editor Footer */
@@ -486,7 +493,7 @@
             
             <div class="glass-dropdown" id="dropdown-menu">
                 <a href="mailto:ashiqur@cariowns.xyz" class="dropdown-item" target="_blank" rel="noopener noreferrer">Feedback</a>
-                <a href="https://ashiqur.cariowns.com/Audio-Converter/Privacy-Policy/" class="dropdown-item" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                <a href="https://ashiqur.cariowns.com/Audio-Converter/Privacy-Policy" class="dropdown-item" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 <a href="https://ashiqur.cariowns.com/Audio-Converter/" class="dropdown-item" target="_blank" rel="noopener noreferrer">Web</a>
             </div>
         </div>
