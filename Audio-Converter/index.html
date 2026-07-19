@@ -323,8 +323,8 @@
         <div class="editor-header">
             <label>Write Web Audio API JavaScript:</label>
             <div class="toolbar-group">
-                <button class="tool-btn" onclick="copyCode()" id="copy-btn">📋 Copy</button>
-                <button class="tool-btn" onclick="pasteCode()">📝 Paste</button>
+                <button class="tool-btn" onclick="copyCode()" id="copy-btn">Copy</button>
+                <button class="tool-btn" onclick="pasteCode()">Paste</button>
             </div>
         </div>
         
@@ -373,7 +373,7 @@ freqs.forEach((freq, index) => {
             </div>
             
             <div class="editor-footer" style="margin-top: 10px;">
-                <button class="action-btn" id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
+                <button class="action-btn" id="download-btn" onclick="downloadAudio()">Download WAV</button>
             </div>
         </div>
     </div>
@@ -387,8 +387,8 @@ freqs.forEach((freq, index) => {
             const copyBtn = document.getElementById('copy-btn');
             try {
                 await navigator.clipboard.writeText(codeInput.value);
-                copyBtn.innerText = '✅ Copied!';
-                setTimeout(() => { copyBtn.innerText = '📋 Copy'; }, 2000);
+                copyBtn.innerText = 'Copied!';
+                setTimeout(() => { copyBtn.innerText = 'Copy'; }, 2000);
             } catch (err) { alert('Copy failed. Please copy manually.'); }
         }
 
