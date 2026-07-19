@@ -8,6 +8,13 @@
     <style>
         * {
             box-sizing: border-box;
+            /* Removes the blue tap highlight on mobile devices */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Explicitly remove outlines and tap highlights for clickable elements */
+        button, a, input, textarea {
+            outline: none;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -75,7 +82,6 @@
             position: fixed;
             top: 15px; 
             left: 50%;
-            /* FIX: Widened to stretch across the top, overriding previous constraints */
             width: 95%; 
             max-width: 1400px; 
             height: 60px;
@@ -86,7 +92,6 @@
             z-index: 1000;
             border-radius: 30px; 
             
-            /* FIX: Made highly transparent to reveal the liquid glass blur */
             background: rgba(20, 25, 40, 0.25);
             backdrop-filter: blur(16px) saturate(120%);
             -webkit-backdrop-filter: blur(16px) saturate(120%);
@@ -109,6 +114,7 @@
             border-radius: 8px;
             background: white; 
             padding: 2px;
+            cursor: pointer;
         }
 
         .nav-middle {
@@ -117,6 +123,13 @@
             color: var(--text-main);
             letter-spacing: 2px;
             text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Container for 3 dots button and the popup menu */
+        .nav-right-container {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         .nav-right-btn {
@@ -139,6 +152,52 @@
         .nav-right-btn:hover svg {
             fill: var(--primary);
             transform: scale(1.1);
+        }
+
+        /* --- LIQUID GLASS DROPDOWN POPUP --- */
+        .glass-dropdown {
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 170px;
+            background: rgba(20, 25, 40, 0.4);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 8px 0;
+            
+            /* Hidden State Properties */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.3, 0, 0.2, 1);
+            transform-origin: top right;
+        }
+
+        /* Active State Properties */
+        .glass-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .dropdown-item {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
         }
 
         /* --- TITLE BLOCK --- */
@@ -400,16 +459,26 @@
     <!-- Floating Pill Header -->
     <div class="top-nav" id="main-header">
         <a href="https://www.instagram.com/ashiqur.sf" target="_blank" rel="noopener noreferrer">
-        <img src="favicon.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'">
+            <img src="favicon.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'">
         </a>
         <div class="nav-middle">WAVC</div>
-        <button class="nav-right-btn" aria-label="Menu">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="5" r="2.5"/>
-                <circle cx="12" cy="12" r="2.5"/>
-                <circle cx="12" cy="19" r="2.5"/>
-            </svg>
-        </button>
+        
+        <!-- Nav Right Container with Dropdown Menu -->
+        <div class="nav-right-container">
+            <button class="nav-right-btn" id="menu-btn" aria-label="Menu" onclick="toggleMenu(event)">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="5" r="2.5"/>
+                    <circle cx="12" cy="12" r="2.5"/>
+                    <circle cx="12" cy="19" r="2.5"/>
+                </svg>
+            </button>
+            
+            <div class="glass-dropdown" id="dropdown-menu">
+                <a href="mailto:ashiqur@cariowns.xyz" class="dropdown-item" target="_blank" rel="noopener noreferrer">Feedback</a>
+                <a href="https://ashiqur.cariowns.com/Audio-Converter/Privacy-Policy/" class="dropdown-item" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                <a href="https://ashiqur.cariowns.com/Audio-Converter/" class="dropdown-item" target="_blank" rel="noopener noreferrer">Web</a>
+            </div>
+        </div>
     </div>
 
     <div class="title-block">
@@ -477,6 +546,24 @@ freqs.forEach((freq, index) => {
     </div>
 
     <script>
+        // --- 3-Dot Menu Logic ---
+        function toggleMenu(event) {
+            // Stops the click from bubbling up to the document listener
+            event.stopPropagation();
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('show');
+        }
+
+        // Close the menu automatically when clicking anywhere else on the screen
+        document.addEventListener('click', (event) => {
+            const menu = document.getElementById('dropdown-menu');
+            const menuBtn = document.getElementById('menu-btn');
+            
+            if (menu.classList.contains('show') && !menu.contains(event.target) && !menuBtn.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
         // --- Smooth Scroll Logic ---
         let lastScrollTop = 0;
         const header = document.getElementById('main-header');
@@ -488,6 +575,8 @@ freqs.forEach((freq, index) => {
             
             if (scrollTop > lastScrollTop && scrollTop > 60) {
                 header.classList.add('header-hidden');
+                // Also close menu when scrolling down
+                document.getElementById('dropdown-menu').classList.remove('show');
             } else {
                 header.classList.remove('header-hidden');
             }
