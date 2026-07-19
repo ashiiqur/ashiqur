@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Synthesizer</title>
+    <style>
+        :root { --primary: #6366f1; --hover: #4f46e5; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        
+        /* Typing Effect Block */
+        .typing-container { margin-bottom: 40px; }
+        .typing-text { font-size: 24px; border-right: 3px solid var(--primary); white-space: nowrap; overflow: hidden; animation: typing 3.5s steps(30, end), blink 0.75s step-end infinite; }
+        
+        @keyframes typing { from { width: 0; } to { width: 100%; } }
+        @keyframes blink { from, to { border-color: transparent; } 50% { border-color: var(--primary); } }
+
+        /* Button Styling */
+        button { background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        button:hover { background: var(--hover); transform: translateY(-5px); box-shadow: 0 10px 15px rgba(99, 102, 241, 0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="typing-container">
+        <div class="typing-text">Synthesize & Convert to WAV</div>
+    </div>
+
+    <button onclick="downloadChimeAsWav()">Generate & Download WAV</button>
+
+    <script>
+        async function downloadChimeAsWav() {
+            const duration = 1.5, sampleRate = 44100;
+            const offlineCtx = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+            const now = offlineCtx.currentTime;
+            const freqs = [523.25, 659.25, 783.99, 1046.50];
+
+            freqs.forEach((freq, index) => {
+                const osc = offlineCtx.createOscillator();
+                const gainNode = offlineCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + (index * 0.05));
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
+                osc.connect(gainNode);
+                gainNode.connect(offlineCtx.destination);
+                osc.start(now + (index * 0.05));
+                osc.stop(now + 0.8 + (index * 0.05));
+            });
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            const wavBlob = bufferToWav(renderedBuffer);
+            const url = URL.createObjectURL(wavBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SynthesizedSound.wav';
+            a.click();
+        }
+
+        function bufferToWav(abuffer) {
+            let numOfChan = abuffer.numberOfChannels, length = abuffer.length * numOfChan * 2 + 44;
+            let buffer = new ArrayBuffer(length), view = new DataView(buffer);
+            let pos = 0, offset = 0;
+            function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
+            for(let i = 0; i < numOfChan; i++) {
+                let channel = abuffer.getChannelData(i);
+                while(pos < length) {
+                    let sample = Math.max(-1, Math.min(1, channel[offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    view.setInt16(pos, sample, true); pos += 2; offset++;
+                }
+            }
+            return new Blob([buffer], {type: "audio/wav"});
+        }
+    </script>
+</body>
+</html>
