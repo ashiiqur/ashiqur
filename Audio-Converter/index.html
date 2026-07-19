@@ -23,8 +23,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; 
-            /* Increased top padding so the fixed header doesn't cover the editor initially */
-            padding: 130px 20px 40px 20px; 
+            /* 100px top padding ensures content clears the fixed navbar */
+            padding: 100px 20px 40px 20px; 
             min-height: 100vh;
             margin: 0;
             box-sizing: border-box;
@@ -67,17 +67,18 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* --- LIQUID GLASS FLOATING HEADER --- */
-        .header-container {
+        /* --- LIQUID GLASS FLOATING NAV BAR --- */
+        .top-nav {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 15px 0;
+            height: 64px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
+            padding: 0 20px;
+            box-sizing: border-box;
             z-index: 1000;
             
             /* Glassmorphism Styles */
@@ -87,16 +88,64 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255,255,255,0.05);
             
-            /* Smooth Hide/Show Transition */
-            transition: transform 0.4s cubic-bezier(0.3, 0, 0.2, 1);
+            /* Extremely Smooth Hardware-Accelerated Transition */
+            transition: transform 0.4s ease-in-out;
+            will-change: transform;
         }
 
         .header-hidden {
             transform: translateY(-100%);
         }
 
+        .nav-logo {
+            height: 36px;
+            width: 36px;
+            object-fit: contain;
+            border-radius: 8px; /* Optional: smooth edges for the logo */
+        }
+
+        .nav-middle {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .nav-right-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-right-btn svg {
+            fill: var(--text-main);
+            width: 24px;
+            height: 24px;
+            transition: fill 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-right-btn:hover svg {
+            fill: var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* --- TITLE BLOCK (Now located in the main body) --- */
+        .title-block {
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+
         .main-title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             margin: 0;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -106,11 +155,11 @@
         }
 
         .sub-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             color: #94a3b8;
             letter-spacing: 2.5px;
-            margin-top: 4px;
+            margin-top: 8px;
             text-transform: uppercase;
         }
 
@@ -343,8 +392,22 @@
         </ul>
     </div>
 
-    <!-- Floating Liquid Glass Header -->
-    <div class="header-container" id="main-header">
+    <!-- NEW Floating Liquid Glass Navbar -->
+    <div class="top-nav" id="main-header">
+        <img src="logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'">
+        <div class="nav-middle">WAVC</div>
+        <button class="nav-right-btn" aria-label="Menu">
+            <!-- 3 Dots SVG Icon -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="5" r="2.5"/>
+                <circle cx="12" cy="12" r="2.5"/>
+                <circle cx="12" cy="19" r="2.5"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Titles Restored Back to the Body Layout -->
+    <div class="title-block">
         <h1 class="main-title">Code to WAV Converter</h1>
         <div class="sub-title">Process locally on device</div>
     </div>
@@ -409,28 +472,31 @@ freqs.forEach((freq, index) => {
     </div>
 
     <script>
-        // --- Scroll Header Hide/Show Logic ---
+        // --- Smooth Scroll Logic ---
         let lastScrollTop = 0;
         const header = document.getElementById('main-header');
 
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
-            // If scrolling down and past the header height, hide it
-            if (scrollTop > lastScrollTop && scrollTop > 80) {
+            // Adding a small math threshold prevents micro-jitters
+            if (Math.abs(lastScrollTop - scrollTop) <= 5) return;
+            
+            // If scrolling down and past 60px, smoothly slide header up
+            if (scrollTop > lastScrollTop && scrollTop > 60) {
                 header.classList.add('header-hidden');
-            } 
-            // If scrolling up, show it
-            else {
+            } else {
+                // If scrolling up, smoothly slide it back down
                 header.classList.remove('header-hidden');
             }
             
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+            lastScrollTop = scrollTop;
         });
 
-        // --- Audio Synthesizer Logic ---
+        // --- Audio Engine Logic ---
         let currentAudioUrl = null; 
 
+        // Copy Logic
         async function copyCode() {
             const codeInput = document.getElementById('code-input');
             const copyBtn = document.getElementById('copy-btn');
@@ -441,6 +507,7 @@ freqs.forEach((freq, index) => {
             } catch (err) { alert('Copy failed. Please copy manually.'); }
         }
 
+        // Paste Logic 
         async function pasteCode() {
             const codeInput = document.getElementById('code-input');
             try {
@@ -450,6 +517,7 @@ freqs.forEach((freq, index) => {
             } catch (err) { alert('Please allow clipboard permissions or paste manually.'); }
         }
 
+        // Custom Player Elements
         const audioPlayer = document.getElementById('audio-player');
         const playBtn = document.getElementById('play-btn');
         const seekSlider = document.getElementById('seek-slider');
@@ -461,6 +529,7 @@ freqs.forEach((freq, index) => {
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
+            // Auto-Detects DURATION variable in code
             let duration = 2.0; 
             const durationMatch = userCode.match(/duration\s*=\s*([\d.]+)/i);
             if (durationMatch) {
@@ -494,6 +563,7 @@ freqs.forEach((freq, index) => {
                 timeCurrent.innerText = '0:00';
                 timeTotal.innerText = '0:00';
 
+                // Reveal only if currently hidden
                 if (previewSection.style.display !== 'flex') {
                     previewSection.style.display = 'flex';
                 }
@@ -511,6 +581,7 @@ freqs.forEach((freq, index) => {
             }
         }
 
+        // Custom Player Play/Pause Logic
         function togglePlay() {
             if (audioPlayer.paused) {
                 audioPlayer.play();
@@ -548,6 +619,7 @@ freqs.forEach((freq, index) => {
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
+        // WAV Encoding Logic
         function downloadAudio() {
             if (!currentAudioUrl) return;
             const a = document.createElement('a');
