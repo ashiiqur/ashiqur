@@ -662,18 +662,22 @@ freqs.forEach((freq, index) => {
                     URL.revokeObjectURL(currentAudioUrl);
                 }
 
-                currentAudioUrl = URL.createObjectURL(wavBlob);
-                audioPlayer.src = currentAudioUrl;
-                
-                playBtn.innerText = '▶';
-                seekSlider.value = 0;
-                seekSlider.style.background = 'rgba(255, 255, 255, 0.3)';
-                timeCurrent.innerText = '0:00';
-                timeTotal.innerText = '0:00';
+               currentAudioUrl = URL.createObjectURL(wavBlob);
+audioPlayer.src = currentAudioUrl;
 
-                if (previewSection.style.display !== 'flex') {
-                    previewSection.style.display = 'flex';
-                }
+// Updated to use SVG
+playBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+// Accessibility update
+playBtn.setAttribute("aria-label", "Play");
+
+seekSlider.value = 0;
+seekSlider.style.background = 'rgba(255, 255, 255, 0.3)';
+timeCurrent.innerText = '0:00';
+timeTotal.innerText = '0:00';
+
+if (previewSection.style.display !== 'flex') {
+    previewSection.style.display = 'flex';
+}
                 
                 statusDiv.style.color = 'var(--success)';
                 statusDiv.innerText = "Updated!";
@@ -689,14 +693,17 @@ freqs.forEach((freq, index) => {
         }
 
         function togglePlay() {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                playBtn.innerText = '◼';
-            } else {
-                audioPlayer.pause();
-                playBtn.innerText = '▶';
-            }
-        }
+    const playIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    const stopIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>`;
+
+    if (audioPlayer.paused) {
+        audioPlayer.play();
+        playBtn.innerHTML = stopIcon;
+    } else {
+        audioPlayer.pause();
+        playBtn.innerHTML = playIcon;
+    }
+}
 
         audioPlayer.addEventListener('loadedmetadata', () => {
             seekSlider.max = audioPlayer.duration;
