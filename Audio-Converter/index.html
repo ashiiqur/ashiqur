@@ -23,8 +23,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; 
-            /* 100px top padding ensures content clears the fixed navbar */
-            padding: 100px 20px 40px 20px; 
+            /* Extra top padding so content clears the floating pill header */
+            padding: 110px 20px 40px 20px; 
             min-height: 100vh;
             margin: 0;
             box-sizing: border-box;
@@ -67,45 +67,51 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* --- LIQUID GLASS FLOATING NAV BAR --- */
+        /* --- FLOATING PILL NAV BAR --- */
         .top-nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 64px;
+            top: 15px; /* Detached from top */
+            left: 50%;
+            transform: translateX(-50%) translateY(0); /* Centers it exactly */
+            width: 90%;
+            max-width: 700px; /* Matches the editor width */
+            height: 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 15px;
             box-sizing: border-box;
             z-index: 1000;
+            border-radius: 30px; /* Makes it a perfect pill shape */
             
-            /* Glassmorphism Styles */
-            background: linear-gradient(135deg, rgba(20, 25, 40, 0.75) 0%, rgba(10, 15, 25, 0.55) 100%);
+            /* Darker Glassmorphism Styles matching the image */
+            background: rgba(10, 15, 25, 0.85);
             backdrop-filter: blur(20px) saturate(120%);
             -webkit-backdrop-filter: blur(20px) saturate(120%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
             
-            /* Extremely Smooth Hardware-Accelerated Transition */
-            transition: transform 0.4s ease-in-out;
+            /* Transition handles both the centering and the hide/show */
+            transition: transform 0.4s cubic-bezier(0.3, 0, 0.2, 1);
             will-change: transform;
         }
 
         .header-hidden {
-            transform: translateY(-100%);
+            /* Keeps it centered while sliding it up and out of view */
+            transform: translateX(-50%) translateY(-150%);
         }
 
         .nav-logo {
             height: 36px;
             width: 36px;
             object-fit: contain;
-            border-radius: 8px; /* Optional: smooth edges for the logo */
+            border-radius: 8px;
+            background: white; /* Matches the white box behind the QR in the image */
+            padding: 2px;
         }
 
         .nav-middle {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: var(--text-main);
             letter-spacing: 2px;
@@ -134,7 +140,7 @@
             transform: scale(1.1);
         }
 
-        /* --- TITLE BLOCK (Now located in the main body) --- */
+        /* --- TITLE BLOCK --- */
         .title-block {
             margin-bottom: 30px;
             display: flex;
@@ -145,7 +151,7 @@
         }
 
         .main-title {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             margin: 0;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -392,12 +398,11 @@
         </ul>
     </div>
 
-    <!-- NEW Floating Liquid Glass Navbar -->
+    <!-- Floating Pill Header -->
     <div class="top-nav" id="main-header">
-        <img src="favicon.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'">
+        <img src="logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'">
         <div class="nav-middle">WAVC</div>
         <button class="nav-right-btn" aria-label="Menu">
-            <!-- 3 Dots SVG Icon -->
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="5" r="2.5"/>
                 <circle cx="12" cy="12" r="2.5"/>
@@ -406,7 +411,6 @@
         </button>
     </div>
 
-    <!-- Titles Restored Back to the Body Layout -->
     <div class="title-block">
         <h1 class="main-title">Code to WAV Converter</h1>
         <div class="sub-title">Process locally on device</div>
@@ -479,14 +483,11 @@ freqs.forEach((freq, index) => {
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
-            // Adding a small math threshold prevents micro-jitters
             if (Math.abs(lastScrollTop - scrollTop) <= 5) return;
             
-            // If scrolling down and past 60px, smoothly slide header up
             if (scrollTop > lastScrollTop && scrollTop > 60) {
                 header.classList.add('header-hidden');
             } else {
-                // If scrolling up, smoothly slide it back down
                 header.classList.remove('header-hidden');
             }
             
@@ -529,7 +530,6 @@ freqs.forEach((freq, index) => {
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
-            // Auto-Detects DURATION variable in code
             let duration = 2.0; 
             const durationMatch = userCode.match(/duration\s*=\s*([\d.]+)/i);
             if (durationMatch) {
@@ -563,7 +563,6 @@ freqs.forEach((freq, index) => {
                 timeCurrent.innerText = '0:00';
                 timeTotal.innerText = '0:00';
 
-                // Reveal only if currently hidden
                 if (previewSection.style.display !== 'flex') {
                     previewSection.style.display = 'flex';
                 }
@@ -619,7 +618,6 @@ freqs.forEach((freq, index) => {
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // WAV Encoding Logic
         function downloadAudio() {
             if (!currentAudioUrl) return;
             const a = document.createElement('a');
