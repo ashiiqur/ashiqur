@@ -110,10 +110,44 @@
             z-index: 10;
         }
 
+        /* NEW: Editor Header and Toolbar Layout */
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         label {
             font-size: 14px;
             color: #cbd5e1;
             font-weight: 600;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
         }
 
         textarea {
@@ -183,7 +217,7 @@
             font-weight: 600;
         }
 
-        /* --- NEW Custom Audio Player Interface --- */
+        /* --- Custom Audio Player Interface --- */
         #preview-section {
             display: none; 
             flex-direction: column;
@@ -247,7 +281,7 @@
             -webkit-appearance: none;
             appearance: none;
             height: 6px;
-            background: rgba(255, 255, 255, 0.3); /* Made much whiter for the unplayed track */
+            background: rgba(255, 255, 255, 0.3); 
             border-radius: 4px;
             outline: none;
             cursor: pointer;
@@ -285,7 +319,15 @@
     </div>
 
     <div class="editor-container">
-        <label>Write Web Audio API JavaScript (variables `offlineCtx` and `now` are provided):</label>
+        
+        <!-- NEW: Editor Header with Copy/Paste Toolbar -->
+        <div class="editor-header">
+            <label>Write Web Audio API JavaScript:</label>
+            <div class="toolbar-group">
+                <button class="tool-btn" onclick="copyCode()" id="copy-btn">📋 Copy</button>
+                <button class="tool-btn" onclick="pasteCode()">📝 Paste</button>
+            </div>
+        </div>
         
         <textarea id="code-input" spellcheck="false">
 // This code generates a soft C Major Chord arpeggio
@@ -330,13 +372,40 @@ freqs.forEach((freq, index) => {
             </div>
             
             <div class="btn-group">
-                <button class="action-btn" id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
+                <button class="action-btn" id="download-btn" onclick="downloadAudio()">Download WAV</button>
             </div>
         </div>
     </div>
 
     <script>
         let currentAudioUrl = null; 
+
+        // Copy / Paste Logic
+        async function copyCode() {
+            const codeInput = document.getElementById('code-input');
+            const copyBtn = document.getElementById('copy-btn');
+            try {
+                await navigator.clipboard.writeText(codeInput.value);
+                copyBtn.innerText = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerText = '📋 Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+                alert('Copy failed. Please copy manually.');
+            }
+        }
+
+        async function pasteCode() {
+            const codeInput = document.getElementById('code-input');
+            try {
+                const text = await navigator.clipboard.readText();
+                codeInput.value = text;
+            } catch (err) {
+                console.error('Failed to paste', err);
+                alert('Please allow clipboard permissions or paste manually.');
+            }
+        }
 
         // Custom Player Elements
         const audioPlayer = document.getElementById('audio-player');
