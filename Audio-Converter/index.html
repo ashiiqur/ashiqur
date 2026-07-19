@@ -6,10 +6,13 @@
     <title>Code to WAV Synthesizer</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --container-bg: #1e293b;
+            /* Changed to pure black */
+            --bg-color: #000000; 
+            --container-bg: #111827;
             --primary: #3b82f6;
             --hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
             --text-main: #f8fafc;
             --code-text: #38bdf8;
         }
@@ -58,9 +61,10 @@
         /* Editor Layout */
         .editor-container {
             background: var(--container-bg);
-            padding: 20px;
+            padding: 24px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #1f2937;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1); /* Subtle blue glow on black bg */
             width: 100%;
             max-width: 700px;
             display: flex;
@@ -76,8 +80,8 @@
 
         textarea {
             width: 100%;
-            height: 300px;
-            background: #0b1120;
+            height: 280px;
+            background: #030712;
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 14px;
@@ -95,18 +99,24 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
-        /* Interactive Button */
+        /* Interactive Buttons */
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+        }
+
         button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 14px 24px;
-            font-size: 16px;
+            padding: 12px 24px;
+            font-size: 15px;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            align-self: flex-end;
         }
 
         button:hover {
@@ -119,11 +129,49 @@
             transform: translateY(1px);
         }
 
+        #download-btn {
+            background: var(--success);
+        }
+
+        #download-btn:hover {
+            background: var(--success-hover);
+            box-shadow: 0 8px 15px rgba(16, 185, 129, 0.4);
+        }
+
         #status {
             font-size: 14px;
-            text-align: right;
-            height: 20px;
-            color: #10b981; /* Success Green */
+            font-weight: 600;
+        }
+
+        /* Preview Interface Section */
+        #preview-section {
+            display: none; /* Hidden until generated */
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        audio {
+            width: 100%;
+            border-radius: 8px;
+            outline: none;
+        }
+        
+        audio::-webkit-media-controls-panel {
+            background-color: #1f2937;
+        }
+        
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+            color: white;
         }
     </style>
 </head>
@@ -136,7 +184,6 @@
     <div class="editor-container">
         <label>Write Web Audio API JavaScript (variables `offlineCtx` and `now` are provided):</label>
         
-        <!-- The default code sits inside the textarea so users can edit it -->
         <textarea id="code-input" spellcheck="false">
 // This code generates a soft C Major Chord arpeggio
 const freqs = [523.25, 659.25, 783.99, 1046.50];
@@ -160,15 +207,33 @@ freqs.forEach((freq, index) => {
 });
 </textarea>
 
-        <button onclick="processAndDownload()">Generate & Download WAV</button>
-        <div id="status"></div>
+        <div class="btn-group">
+            <div id="status"></div>
+            <button onclick="generatePreview()">Generate Preview</button>
+        </div>
+
+        <!-- NEW: Preview and Download Section -->
+        <div id="preview-section">
+            <label>Preview Generated Audio:</label>
+            <audio id="audio-player" controls></audio>
+            
+            <div class="btn-group">
+                <button id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        async function processAndDownload() {
+        let currentAudioUrl = null; // Memory to hold the generated audio file
+
+        async function generatePreview() {
             const statusDiv = document.getElementById('status');
             const userCode = document.getElementById('code-input').value;
+            const previewSection = document.getElementById('preview-section');
+            const audioPlayer = document.getElementById('audio-player');
             
+            // Hide previous preview while processing
+            previewSection.style.display = 'none';
             statusDiv.style.color = '#38bdf8';
             statusDiv.innerText = "Processing...";
 
@@ -188,25 +253,34 @@ freqs.forEach((freq, index) => {
                 
                 // Convert to WAV
                 const wavBlob = bufferToWav(renderedBuffer);
-                const url = URL.createObjectURL(wavBlob);
                 
-                // Trigger Download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Custom_Audio.wav';
-                a.click();
-                
-                URL.revokeObjectURL(url);
+                // Cleanup the old memory URL if the user clicks generate multiple times
+                if (currentAudioUrl) {
+                    URL.revokeObjectURL(currentAudioUrl);
+                }
 
-                statusDiv.style.color = '#10b981';
-                statusDiv.innerText = "✅ Download successful!";
-                setTimeout(() => statusDiv.innerText = "", 3000);
+                // Create new URL and set it to the audio player
+                currentAudioUrl = URL.createObjectURL(wavBlob);
+                audioPlayer.src = currentAudioUrl;
+                
+                // Reveal the player and download button
+                previewSection.style.display = 'flex';
+                statusDiv.innerText = ""; // Clear processing text
 
             } catch (error) {
                 console.error(error);
-                statusDiv.style.color = '#ef4444';
+                statusDiv.style.color = '#ef4444'; /* Red error color */
                 statusDiv.innerText = "❌ Error in your code. Check console.";
             }
+        }
+
+        function downloadAudio() {
+            if (!currentAudioUrl) return;
+            
+            const a = document.createElement('a');
+            a.href = currentAudioUrl;
+            a.download = 'Custom_Audio.wav';
+            a.click();
         }
 
         // Standard function to encode a raw audio buffer into a playable WAV file
