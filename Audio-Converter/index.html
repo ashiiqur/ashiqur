@@ -3,79 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Synthesizer</title>
+    <title>Code to WAV Synthesizer</title>
     <style>
-        :root { --primary: #6366f1; --hover: #4f46e5; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        
-        /* Typing Effect Block */
-        .typing-container { margin-bottom: 40px; }
-        .typing-text { font-size: 24px; border-right: 3px solid var(--primary); white-space: nowrap; overflow: hidden; animation: typing 3.5s steps(30, end), blink 0.75s step-end infinite; }
-        
-        @keyframes typing { from { width: 0; } to { width: 100%; } }
-        @keyframes blink { from, to { border-color: transparent; } 50% { border-color: var(--primary); } }
+        :root {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --primary: #3b82f6;
+            --hover: #2563eb;
+            --text-main: #f8fafc;
+            --code-text: #38bdf8;
+        }
 
-        /* Button Styling */
-        button { background: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        button:hover { background: var(--hover); transform: translateY(-5px); box-shadow: 0 10px 15px rgba(99, 102, 241, 0.4); }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Animated Typing Header */
+        .header-container {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            height: 40px;
+        }
+
+        .typing-text {
+            font-size: 28px;
+            font-weight: 700;
+            border-right: 3px solid var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+            animation: typing 2.5s steps(30, end) forwards, blink 0.8s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary); }
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            background: var(--container-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #0b1120;
+            color: var(--code-text);
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            resize: vertical;
+            outline: none;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Interactive Button */
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            align-self: flex-end;
+        }
+
+        button:hover {
+            background: var(--hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        #status {
+            font-size: 14px;
+            text-align: right;
+            height: 20px;
+            color: #10b981; /* Success Green */
+        }
     </style>
 </head>
 <body>
 
-    <div class="typing-container">
-        <div class="typing-text">Synthesize & Convert to WAV</div>
+    <div class="header-container">
+        <div class="typing-text">Code to WAV Converter</div>
     </div>
 
-    <button onclick="downloadChimeAsWav()">Generate & Download WAV</button>
+    <div class="editor-container">
+        <label>Write Web Audio API JavaScript (variables `offlineCtx` and `now` are provided):</label>
+        
+        <!-- The default code sits inside the textarea so users can edit it -->
+        <textarea id="code-input" spellcheck="false">
+// This code generates a soft C Major Chord arpeggio
+const freqs = [523.25, 659.25, 783.99, 1046.50];
+
+freqs.forEach((freq, index) => {
+    const osc = offlineCtx.createOscillator();
+    const gainNode = offlineCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now + (index * 0.05));
+
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
+
+    osc.connect(gainNode);
+    gainNode.connect(offlineCtx.destination);
+
+    osc.start(now + (index * 0.05));
+    osc.stop(now + 0.8 + (index * 0.05));
+});
+</textarea>
+
+        <button onclick="processAndDownload()">Generate & Download WAV</button>
+        <div id="status"></div>
+    </div>
 
     <script>
-        async function downloadChimeAsWav() {
-            const duration = 1.5, sampleRate = 44100;
-            const offlineCtx = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
-            const now = offlineCtx.currentTime;
-            const freqs = [523.25, 659.25, 783.99, 1046.50];
+        async function processAndDownload() {
+            const statusDiv = document.getElementById('status');
+            const userCode = document.getElementById('code-input').value;
+            
+            statusDiv.style.color = '#38bdf8';
+            statusDiv.innerText = "Processing...";
 
-            freqs.forEach((freq, index) => {
-                const osc = offlineCtx.createOscillator();
-                const gainNode = offlineCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now + (index * 0.05));
-                gainNode.gain.setValueAtTime(0, now);
-                gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
-                osc.connect(gainNode);
-                gainNode.connect(offlineCtx.destination);
-                osc.start(now + (index * 0.05));
-                osc.stop(now + 0.8 + (index * 0.05));
-            });
+            try {
+                // Set up the Offline Audio Environment (2 seconds long)
+                const duration = 2.0;
+                const sampleRate = 44100;
+                const offlineCtx = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+                const now = offlineCtx.currentTime;
 
-            const renderedBuffer = await offlineCtx.startRendering();
-            const wavBlob = bufferToWav(renderedBuffer);
-            const url = URL.createObjectURL(wavBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'SynthesizedSound.wav';
-            a.click();
+                // Execute the user's code safely inside this specific function scope
+                const userFunction = new Function('offlineCtx', 'now', userCode);
+                userFunction(offlineCtx, now);
+
+                // Render the audio
+                const renderedBuffer = await offlineCtx.startRendering();
+                
+                // Convert to WAV
+                const wavBlob = bufferToWav(renderedBuffer);
+                const url = URL.createObjectURL(wavBlob);
+                
+                // Trigger Download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Custom_Audio.wav';
+                a.click();
+                
+                URL.revokeObjectURL(url);
+
+                statusDiv.style.color = '#10b981';
+                statusDiv.innerText = "✅ Download successful!";
+                setTimeout(() => statusDiv.innerText = "", 3000);
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.style.color = '#ef4444';
+                statusDiv.innerText = "❌ Error in your code. Check console.";
+            }
         }
 
+        // Standard function to encode a raw audio buffer into a playable WAV file
         function bufferToWav(abuffer) {
-            let numOfChan = abuffer.numberOfChannels, length = abuffer.length * numOfChan * 2 + 44;
-            let buffer = new ArrayBuffer(length), view = new DataView(buffer);
-            let pos = 0, offset = 0;
+            let numOfChan = abuffer.numberOfChannels;
+            let length = abuffer.length * numOfChan * 2 + 44;
+            let buffer = new ArrayBuffer(length);
+            let view = new DataView(buffer);
+            let channels = [], sample, offset = 0, pos = 0;
+
             function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
             function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
-            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
-            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
-            setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
-            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
-            for(let i = 0; i < numOfChan; i++) {
-                let channel = abuffer.getChannelData(i);
-                while(pos < length) {
-                    let sample = Math.max(-1, Math.min(1, channel[offset]));
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-                    view.setInt16(pos, sample, true); pos += 2; offset++;
-                }
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8); // file length - 8
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt " chunk
+            setUint32(16);         // length = 16
+            setUint16(1);          // PCM (uncompressed)
+            setUint16(numOfChan);
+            setUint32(abuffer.sampleRate);
+            setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+            setUint16(numOfChan * 2); // block-align
+            setUint16(16);         // 16-bit
+
+            setUint32(0x61746164); // "data" - chunk
+            setUint32(length - pos - 4); // chunk length
+
+            for(let i = 0; i < abuffer.numberOfChannels; i++) {
+                channels.push(abuffer.getChannelData(i));
             }
+
+            while(pos < length) {
+                for(let i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit
+                    view.setInt16(pos, sample, true); 
+                    pos += 2;
+                }
+                offset++;
+            }
+
             return new Blob([buffer], {type: "audio/wav"});
         }
     </script>
