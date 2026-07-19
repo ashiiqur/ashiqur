@@ -6,16 +6,27 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Audio Converter</title>
     <style>
+        /* Base layer locked to dark to prevent white flashes */
+        html, body {
+            background-color: #0f0c29; 
+        }
+
         * {
             box-sizing: border-box;
-            /* Removes the blue tap highlight on mobile devices */
-            -webkit-tap-highlight-color: transparent;
+            /* Force complete transparency on mobile taps */
+            -webkit-tap-highlight-color: transparent !important;
         }
 
         /* Explicitly remove outlines and tap highlights for clickable elements */
-        button, a, input, textarea {
+        button, a, input, textarea, .nav-logo {
             outline: none;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        /* Prevent text selection on the links to stop highlighting flashes */
+        a {
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         :root {
