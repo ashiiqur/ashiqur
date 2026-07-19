@@ -21,11 +21,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            
-            /* THE FIX: Anchor to the top instead of center to prevent jumping */
             justify-content: flex-start; 
             padding: 10vh 20px 40px 20px; 
-            
             min-height: 100vh;
             margin: 0;
             box-sizing: border-box;
@@ -150,7 +147,7 @@
             gap: 15px;
         }
 
-        button {
+        .action-btn {
             background: linear-gradient(135deg, var(--primary), var(--hover));
             color: white;
             border: none;
@@ -163,12 +160,12 @@
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
         }
 
-        button:hover {
+        .action-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
         }
 
-        button:active {
+        .action-btn:active {
             transform: translateY(1px);
         }
 
@@ -186,7 +183,7 @@
             font-weight: 600;
         }
 
-        /* Preview Interface Section */
+        /* --- NEW Custom Audio Player Interface --- */
         #preview-section {
             display: none; 
             flex-direction: column;
@@ -202,20 +199,74 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        audio {
-            width: 100%;
+        .custom-player {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 20px;
             border-radius: 8px;
-            outline: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            width: 100%;
+            box-sizing: border-box;
         }
-        
-        audio::-webkit-media-controls-panel {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        audio::-webkit-media-controls-current-time-display,
-        audio::-webkit-media-controls-time-remaining-display {
+
+        .play-pause-btn {
+            background: transparent;
+            border: none;
             color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            transition: transform 0.2s, color 0.2s;
+        }
+        
+        .play-pause-btn:hover {
+            transform: scale(1.15);
+            color: var(--primary);
+        }
+
+        .time-display {
+            font-size: 13px;
+            color: #cbd5e1;
+            font-family: 'Fira Code', monospace;
+            min-width: 40px;
+            text-align: center;
+            user-select: none;
+        }
+
+        /* Custom Audio Slider */
+        #seek-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3); /* Made much whiter for the unplayed track */
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #seek-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #seek-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
         }
     </style>
 </head>
@@ -224,18 +275,11 @@
     <!-- Falling Shapes Background -->
     <div class="bg-animation">
         <ul style="padding:0; margin:0;">
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
-            <li class="shape"></li>
+            <li class="shape"></li><li class="shape"></li><li class="shape"></li><li class="shape"></li>
+            <li class="shape"></li><li class="shape"></li><li class="shape"></li><li class="shape"></li>
         </ul>
     </div>
 
-    <!-- Main Content -->
     <div class="header-container">
         <div class="typing-text">Code to WAV Converter</div>
     </div>
@@ -268,15 +312,25 @@ freqs.forEach((freq, index) => {
 
         <div class="btn-group">
             <div id="status"></div>
-            <button onclick="generatePreview()">Generate Preview</button>
+            <button class="action-btn" onclick="generatePreview()">Generate Preview</button>
         </div>
 
         <div id="preview-section">
             <label>Preview Generated Audio:</label>
-            <audio id="audio-player" controls></audio>
+            
+            <!-- Hidden Native Audio -->
+            <audio id="audio-player" style="display: none;"></audio>
+            
+            <!-- Custom Styled Player UI -->
+            <div class="custom-player">
+                <button class="play-pause-btn" id="play-btn" onclick="togglePlay()">▶</button>
+                <span class="time-display" id="time-current">0:00</span>
+                <input type="range" id="seek-slider" value="0" step="0.01">
+                <span class="time-display" id="time-total">0:00</span>
+            </div>
             
             <div class="btn-group">
-                <button id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
+                <button class="action-btn" id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
             </div>
         </div>
     </div>
@@ -284,11 +338,17 @@ freqs.forEach((freq, index) => {
     <script>
         let currentAudioUrl = null; 
 
+        // Custom Player Elements
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const seekSlider = document.getElementById('seek-slider');
+        const timeCurrent = document.getElementById('time-current');
+        const timeTotal = document.getElementById('time-total');
+
         async function generatePreview() {
             const statusDiv = document.getElementById('status');
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
-            const audioPlayer = document.getElementById('audio-player');
             
             previewSection.style.display = 'none';
             statusDiv.style.color = 'var(--code-text)';
@@ -313,6 +373,13 @@ freqs.forEach((freq, index) => {
                 currentAudioUrl = URL.createObjectURL(wavBlob);
                 audioPlayer.src = currentAudioUrl;
                 
+                // Reset custom player UI
+                playBtn.innerText = '▶';
+                seekSlider.value = 0;
+                seekSlider.style.background = 'rgba(255, 255, 255, 0.3)';
+                timeCurrent.innerText = '0:00';
+                timeTotal.innerText = '0:00';
+
                 previewSection.style.display = 'flex';
                 statusDiv.innerText = ""; 
 
@@ -323,9 +390,51 @@ freqs.forEach((freq, index) => {
             }
         }
 
+        // --- Custom Player JavaScript Logic ---
+
+        function togglePlay() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playBtn.innerText = '⏸';
+            } else {
+                audioPlayer.pause();
+                playBtn.innerText = '▶';
+            }
+        }
+
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            seekSlider.max = audioPlayer.duration;
+            timeTotal.innerText = formatTime(audioPlayer.duration);
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            seekSlider.value = audioPlayer.currentTime;
+            timeCurrent.innerText = formatTime(audioPlayer.currentTime);
+            
+            // Fills the played portion of the track with purple
+            const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            seekSlider.style.background = `linear-gradient(to right, var(--primary) ${percentage}%, rgba(255, 255, 255, 0.3) ${percentage}%)`;
+        });
+
+        seekSlider.addEventListener('input', () => {
+            audioPlayer.currentTime = seekSlider.value;
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            playBtn.innerText = '▶';
+        });
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // --- End Custom Player Logic ---
+
         function downloadAudio() {
             if (!currentAudioUrl) return;
-            
             const a = document.createElement('a');
             a.href = currentAudioUrl;
             a.download = 'Custom_Audio.wav';
@@ -342,25 +451,15 @@ freqs.forEach((freq, index) => {
             function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
             function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
 
-            setUint32(0x46464952); 
-            setUint32(length - 8); 
-            setUint32(0x45564157); 
-            setUint32(0x20746d66); 
-            setUint32(16);         
-            setUint16(1);          
-            setUint16(numOfChan);
-            setUint32(abuffer.sampleRate);
-            setUint32(abuffer.sampleRate * 2 * numOfChan); 
-            setUint16(numOfChan * 2); 
-            setUint16(16);         
-
-            setUint32(0x61746164); 
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); 
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan); 
+            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); 
             setUint32(length - pos - 4); 
 
             for(let i = 0; i < abuffer.numberOfChannels; i++) {
                 channels.push(abuffer.getChannelData(i));
             }
-
             while(pos < length) {
                 for(let i = 0; i < numOfChan; i++) {
                     sample = Math.max(-1, Math.min(1, channels[i][offset])); 
@@ -370,7 +469,6 @@ freqs.forEach((freq, index) => {
                 }
                 offset++;
             }
-
             return new Blob([buffer], {type: "audio/wav"});
         }
     </script>
