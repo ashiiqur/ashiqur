@@ -23,7 +23,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; 
-            padding: 10vh 20px 40px 20px; 
+            /* Increased top padding so the fixed header doesn't cover the editor initially */
+            padding: 130px 20px 40px 20px; 
             min-height: 100vh;
             margin: 0;
             box-sizing: border-box;
@@ -66,17 +67,36 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* --- Static Header with Subtitle --- */
+        /* --- LIQUID GLASS FLOATING HEADER --- */
         .header-container {
-            margin-bottom: 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
+            z-index: 1000;
+            
+            /* Glassmorphism Styles */
+            background: linear-gradient(135deg, rgba(20, 25, 40, 0.75) 0%, rgba(10, 15, 25, 0.55) 100%);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255,255,255,0.05);
+            
+            /* Smooth Hide/Show Transition */
+            transition: transform 0.4s cubic-bezier(0.3, 0, 0.2, 1);
+        }
+
+        .header-hidden {
+            transform: translateY(-100%);
         }
 
         .main-title {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             margin: 0;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -86,36 +106,25 @@
         }
 
         .sub-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             color: #94a3b8;
             letter-spacing: 2.5px;
-            margin-top: 8px;
+            margin-top: 4px;
             text-transform: uppercase;
         }
 
         /* --- LIQUID GLASS EDITOR LAYOUT --- */
         .editor-container {
-            /* Smooth translucent gradient for the liquid feel */
             background: linear-gradient(135deg, rgba(20, 25, 40, 0.6) 0%, rgba(10, 15, 25, 0.4) 100%);
-            
-            /* Thicker blur and slight saturation boost to make background shapes pop through */
             backdrop-filter: blur(24px) saturate(120%);
             -webkit-backdrop-filter: blur(24px) saturate(120%);
-            
-            /* Edge highlights mimicking light hitting the rim of the glass */
             border: 1px solid rgba(255, 255, 255, 0.08); 
             border-top: 1px solid rgba(255, 255, 255, 0.25);
             border-left: 1px solid rgba(255, 255, 255, 0.15);
-            
             padding: 24px;
-            border-radius: 20px; /* Slightly rounder for a fluid look */
-            
-            /* Outer shadow for lift, inner shadow for hollow volume */
-            box-shadow: 
-                0 15px 35px 0 rgba(0, 0, 0, 0.4),
-                inset 0 0 20px rgba(255, 255, 255, 0.05);
-                
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.05);
             width: 100%;
             max-width: 700px;
             display: flex;
@@ -136,7 +145,7 @@
             font-size: 14px;
             color: #cbd5e1;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Keeps text legible over the glass */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
         }
 
         .toolbar-group {
@@ -168,7 +177,7 @@
         textarea {
             width: 100%;
             height: 380px;
-            background: rgba(0, 0, 0, 0.35); /* More transparent to let the liquid glass show */
+            background: rgba(0, 0, 0, 0.35); 
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
             font-size: 14px;
@@ -334,7 +343,8 @@
         </ul>
     </div>
 
-    <div class="header-container">
+    <!-- Floating Liquid Glass Header -->
+    <div class="header-container" id="main-header">
         <h1 class="main-title">Code to WAV Converter</h1>
         <div class="sub-title">Process locally on device</div>
     </div>
@@ -399,9 +409,28 @@ freqs.forEach((freq, index) => {
     </div>
 
     <script>
+        // --- Scroll Header Hide/Show Logic ---
+        let lastScrollTop = 0;
+        const header = document.getElementById('main-header');
+
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // If scrolling down and past the header height, hide it
+            if (scrollTop > lastScrollTop && scrollTop > 80) {
+                header.classList.add('header-hidden');
+            } 
+            // If scrolling up, show it
+            else {
+                header.classList.remove('header-hidden');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+        });
+
+        // --- Audio Synthesizer Logic ---
         let currentAudioUrl = null; 
 
-        // Copy Logic
         async function copyCode() {
             const codeInput = document.getElementById('code-input');
             const copyBtn = document.getElementById('copy-btn');
@@ -412,19 +441,15 @@ freqs.forEach((freq, index) => {
             } catch (err) { alert('Copy failed. Please copy manually.'); }
         }
 
-        // Paste Logic (FIXED: Now pastes at cursor)
         async function pasteCode() {
             const codeInput = document.getElementById('code-input');
             try {
                 const text = await navigator.clipboard.readText();
-                // Focus the textarea so we interact with the active cursor location
                 codeInput.focus();
-                // Insert text at cursor position (or replace highlighted text)
                 codeInput.setRangeText(text, codeInput.selectionStart, codeInput.selectionEnd, 'end');
             } catch (err) { alert('Please allow clipboard permissions or paste manually.'); }
         }
 
-        // Custom Player Elements
         const audioPlayer = document.getElementById('audio-player');
         const playBtn = document.getElementById('play-btn');
         const seekSlider = document.getElementById('seek-slider');
@@ -436,7 +461,6 @@ freqs.forEach((freq, index) => {
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
-            // Auto-Detects DURATION variable in code
             let duration = 2.0; 
             const durationMatch = userCode.match(/duration\s*=\s*([\d.]+)/i);
             if (durationMatch) {
@@ -487,7 +511,6 @@ freqs.forEach((freq, index) => {
             }
         }
 
-        // Custom Player Play/Pause Logic
         function togglePlay() {
             if (audioPlayer.paused) {
                 audioPlayer.play();
@@ -525,7 +548,6 @@ freqs.forEach((freq, index) => {
             return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // WAV Encoding Logic
         function downloadAudio() {
             if (!currentAudioUrl) return;
             const a = document.createElement('a');
