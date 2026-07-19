@@ -151,7 +151,7 @@
 
         textarea {
             width: 100%;
-            height: 280px;
+            height: 300px;
             background: rgba(0, 0, 0, 0.5); 
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
@@ -172,45 +172,19 @@
             background: rgba(0, 0, 0, 0.7);
         }
 
-        /* Generation Controls */
-        .generation-controls {
+        /* Clean Editor Footer */
+        .editor-footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            background: rgba(0,0,0,0.2);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .duration-input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .duration-input-group input {
-            width: 60px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            font-family: 'Fira Code', monospace;
-            outline: none;
-            text-align: center;
-        }
-
-        .duration-input-group input:focus {
-            border-color: var(--primary);
-        }
-
-        .btn-group {
-            display: flex;
+            justify-content: flex-end;
             align-items: center;
             gap: 15px;
+        }
+
+        #status {
+            font-size: 14px;
+            font-weight: 600;
+            flex-grow: 1;
+            text-align: right;
         }
 
         .action-btn {
@@ -242,11 +216,6 @@
 
         #download-btn:hover {
             box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
-        }
-
-        #status {
-            font-size: 14px;
-            font-weight: 600;
         }
 
         /* --- Custom Audio Player Interface --- */
@@ -354,14 +323,17 @@
         <div class="editor-header">
             <label>Write Web Audio API JavaScript:</label>
             <div class="toolbar-group">
-                <button class="tool-btn" onclick="copyCode()" id="copy-btn">Copy</button>
-                <button class="tool-btn" onclick="pasteCode()">Paste</button>
+                <button class="tool-btn" onclick="copyCode()" id="copy-btn">📋 Copy</button>
+                <button class="tool-btn" onclick="pasteCode()">📝 Paste</button>
             </div>
         </div>
         
-        <!-- Pre-loaded with the original 2-Second Arpeggio -->
+        <!-- The text area now contains the DURATION variable at the very top -->
         <textarea id="code-input" spellcheck="false">
-// This code generates a soft C Major Chord arpeggio
+// 1. Define the audio length in seconds (The engine will read this!)
+const DURATION = 2.0;
+
+// 2. This code generates a soft C Major Chord arpeggio
 const freqs = [523.25, 659.25, 783.99, 1046.50];
 
 freqs.forEach((freq, index) => {
@@ -379,21 +351,13 @@ freqs.forEach((freq, index) => {
     gainNode.connect(offlineCtx.destination);
 
     osc.start(now + (index * 0.05));
-    osc.stop(now + 0.8 + (index * 0.05));
+    osc.stop(now + 0.8 + (index * 0.05)); // Ensures sound ends before DURATION
 });
 </textarea>
 
-        <!-- Generation Controls layout with Duration Input set to 2 -->
-        <div class="generation-controls">
-            <div class="duration-input-group">
-                <label for="audio-duration">Duration (sec):</label>
-                <input type="number" id="audio-duration" value="2" min="1" max="600">
-            </div>
-            
-            <div class="btn-group">
-                <div id="status"></div>
-                <button class="action-btn" onclick="generatePreview()">Generate Preview</button>
-            </div>
+        <div class="editor-footer">
+            <div id="status"></div>
+            <button class="action-btn" onclick="generatePreview()">Generate Preview</button>
         </div>
 
         <div id="preview-section">
@@ -408,8 +372,8 @@ freqs.forEach((freq, index) => {
                 <span class="time-display" id="time-total">0:00</span>
             </div>
             
-            <div class="btn-group" style="justify-content: flex-end;">
-                <button class="action-btn" id="download-btn" onclick="downloadAudio()">Download WAV</button>
+            <div class="editor-footer" style="margin-top: 10px;">
+                <button class="action-btn" id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
             </div>
         </div>
     </div>
@@ -423,8 +387,8 @@ freqs.forEach((freq, index) => {
             const copyBtn = document.getElementById('copy-btn');
             try {
                 await navigator.clipboard.writeText(codeInput.value);
-                copyBtn.innerText = 'Copied!';
-                setTimeout(() => { copyBtn.innerText = 'Copy'; }, 2000);
+                copyBtn.innerText = '✅ Copied!';
+                setTimeout(() => { copyBtn.innerText = '📋 Copy'; }, 2000);
             } catch (err) { alert('Copy failed. Please copy manually.'); }
         }
 
@@ -448,9 +412,13 @@ freqs.forEach((freq, index) => {
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
-            // DYNAMIC DURATION LOGIC
-            let uiDuration = parseFloat(document.getElementById('audio-duration').value);
-            if (isNaN(uiDuration) || uiDuration <= 0) uiDuration = 2.0;
+            // --- NEW: DURATION AUTO-DETECTION ---
+            // The system scans the user's code for "DURATION = X" to set the file length
+            let duration = 2.0; // Fallback default
+            const durationMatch = userCode.match(/DURATION\s*=\s*([\d.]+)/);
+            if (durationMatch) {
+                duration = parseFloat(durationMatch[1]);
+            }
 
             previewSection.style.display = 'none';
             statusDiv.style.color = 'var(--code-text)';
@@ -458,7 +426,7 @@ freqs.forEach((freq, index) => {
 
             try {
                 const sampleRate = 44100;
-                const offlineCtx = new OfflineAudioContext(1, sampleRate * uiDuration, sampleRate);
+                const offlineCtx = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
                 const now = offlineCtx.currentTime;
 
                 const userFunction = new Function('offlineCtx', 'now', userCode);
