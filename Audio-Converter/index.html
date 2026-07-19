@@ -151,7 +151,7 @@
 
         textarea {
             width: 100%;
-            height: 300px;
+            height: 380px; /* Made slightly taller to fit the new code */
             background: rgba(0, 0, 0, 0.5); 
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
@@ -328,31 +328,48 @@
             </div>
         </div>
         
-        <!-- The text area now contains the DURATION variable at the very top -->
+        <!-- Pre-loaded with fully dynamic Duration integration -->
         <textarea id="code-input" spellcheck="false">
 // 1. Define the audio length in seconds (The engine will read this!)
-const DURATION = 2.0;
+const DURATION = 10.0; 
 
-// 2. This code generates a soft C Major Chord arpeggio
-const freqs = [523.25, 659.25, 783.99, 1046.50];
+// 2. Sci-Fi Sweep dynamically linked to DURATION
+const osc = offlineCtx.createOscillator();
+const lfo = offlineCtx.createOscillator();
+const filter = offlineCtx.createBiquadFilter();
+const gainNode = offlineCtx.createGain();
 
-freqs.forEach((freq, index) => {
-    const osc = offlineCtx.createOscillator();
-    const gainNode = offlineCtx.createGain();
+osc.type = 'sawtooth';
+osc.frequency.setValueAtTime(110, now);
+osc.frequency.exponentialRampToValueAtTime(880, now + DURATION); 
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, now + (index * 0.05));
+lfo.type = 'sine';
+lfo.frequency.setValueAtTime(2, now); 
+lfo.frequency.linearRampToValueAtTime(15, now + DURATION);
 
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
+const lfoGain = offlineCtx.createGain();
+lfoGain.gain.setValueAtTime(500, now); 
 
-    osc.connect(gainNode);
-    gainNode.connect(offlineCtx.destination);
+filter.type = 'lowpass';
+filter.frequency.setValueAtTime(400, now);
+filter.Q.setValueAtTime(15, now); 
 
-    osc.start(now + (index * 0.05));
-    osc.stop(now + 0.8 + (index * 0.05)); // Ensures sound ends before DURATION
-});
+gainNode.gain.setValueAtTime(0, now);
+gainNode.gain.linearRampToValueAtTime(0.1, now + (DURATION * 0.2)); 
+gainNode.gain.setValueAtTime(0.1, now + (DURATION * 0.8));          
+gainNode.gain.linearRampToValueAtTime(0, now + DURATION);  
+
+lfo.connect(lfoGain);
+lfoGain.connect(filter.frequency);
+osc.connect(filter);
+filter.connect(gainNode);
+gainNode.connect(offlineCtx.destination);
+
+// The instruments MUST be told to stop at the DURATION!
+lfo.start(now);
+osc.start(now);
+lfo.stop(now + DURATION);
+osc.stop(now + DURATION);
 </textarea>
 
         <div class="editor-footer">
@@ -412,10 +429,10 @@ freqs.forEach((freq, index) => {
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
-            // --- NEW: DURATION AUTO-DETECTION ---
-            // The system scans the user's code for "DURATION = X" to set the file length
-            let duration = 2.0; // Fallback default
-            const durationMatch = userCode.match(/DURATION\s*=\s*([\d.]+)/);
+            // --- FIX: Case-Insensitive DURATION Auto-Detection ---
+            // Now reads DURATION, duration, Duration, etc.
+            let duration = 2.0; 
+            const durationMatch = userCode.match(/duration\s*=\s*([\d.]+)/i);
             if (durationMatch) {
                 duration = parseFloat(durationMatch[1]);
             }
@@ -454,7 +471,7 @@ freqs.forEach((freq, index) => {
             } catch (error) {
                 console.error(error);
                 statusDiv.style.color = '#ef4444'; 
-                statusDiv.innerText = "❌ Error in code.";
+                statusDiv.innerText = "❌ Error in code. Check console.";
             }
         }
 
