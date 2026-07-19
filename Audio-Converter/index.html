@@ -6,7 +6,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <title>Audio Converter</title>
     <style>
-        /* FIX: Ensures padding doesn't stretch containers wider than they should be */
         * {
             box-sizing: border-box;
         }
@@ -28,7 +27,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start; 
-            padding: 100px 20px 40px 20px; 
+            padding: 110px 20px 40px 20px; 
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden; 
@@ -75,22 +74,23 @@
             position: fixed;
             top: 15px; 
             left: 50%;
-            /* FIX: Perfectly matches the exact width of the editor container */
-            width: calc(100% - 40px); 
-            max-width: 700px; 
+            /* FIX: Widened to stretch across the top, overriding previous constraints */
+            width: 95%; 
+            max-width: 1400px; 
             height: 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 20px;
             z-index: 1000;
             border-radius: 30px; 
             
-            background: rgba(10, 15, 25, 0.85);
-            backdrop-filter: blur(20px) saturate(120%);
-            -webkit-backdrop-filter: blur(20px) saturate(120%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            /* FIX: Made highly transparent to reveal the liquid glass blur */
+            background: rgba(20, 25, 40, 0.25);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
             
             transform: translateX(-50%) translateY(0); 
             transition: transform 0.4s cubic-bezier(0.3, 0, 0.2, 1);
@@ -578,7 +578,6 @@ freqs.forEach((freq, index) => {
             }
         }
 
-        // Custom Player Play/Pause Logic
         function togglePlay() {
             if (audioPlayer.paused) {
                 audioPlayer.play();
