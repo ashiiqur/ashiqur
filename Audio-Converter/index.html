@@ -151,7 +151,7 @@
 
         textarea {
             width: 100%;
-            height: 380px; /* Made slightly taller to fit the new code */
+            height: 380px;
             background: rgba(0, 0, 0, 0.5); 
             color: var(--code-text);
             font-family: 'Fira Code', 'Courier New', Courier, monospace;
@@ -328,48 +328,31 @@
             </div>
         </div>
         
-        <!-- Pre-loaded with fully dynamic Duration integration -->
+        <!-- Pre-loaded with your original Soft C Major Chord Arpeggio! -->
         <textarea id="code-input" spellcheck="false">
 // 1. Define the audio length in seconds (The engine will read this!)
-const DURATION = 10.0; 
+const DURATION = 2.0; 
 
-// 2. Sci-Fi Sweep dynamically linked to DURATION
-const osc = offlineCtx.createOscillator();
-const lfo = offlineCtx.createOscillator();
-const filter = offlineCtx.createBiquadFilter();
-const gainNode = offlineCtx.createGain();
+// 2. This code generates a soft C Major Chord arpeggio
+const freqs = [523.25, 659.25, 783.99, 1046.50];
 
-osc.type = 'sawtooth';
-osc.frequency.setValueAtTime(110, now);
-osc.frequency.exponentialRampToValueAtTime(880, now + DURATION); 
+freqs.forEach((freq, index) => {
+    const osc = offlineCtx.createOscillator();
+    const gainNode = offlineCtx.createGain();
 
-lfo.type = 'sine';
-lfo.frequency.setValueAtTime(2, now); 
-lfo.frequency.linearRampToValueAtTime(15, now + DURATION);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now + (index * 0.05));
 
-const lfoGain = offlineCtx.createGain();
-lfoGain.gain.setValueAtTime(500, now); 
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.06, now + (index * 0.05) + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.8 + (index * 0.05));
 
-filter.type = 'lowpass';
-filter.frequency.setValueAtTime(400, now);
-filter.Q.setValueAtTime(15, now); 
+    osc.connect(gainNode);
+    gainNode.connect(offlineCtx.destination);
 
-gainNode.gain.setValueAtTime(0, now);
-gainNode.gain.linearRampToValueAtTime(0.1, now + (DURATION * 0.2)); 
-gainNode.gain.setValueAtTime(0.1, now + (DURATION * 0.8));          
-gainNode.gain.linearRampToValueAtTime(0, now + DURATION);  
-
-lfo.connect(lfoGain);
-lfoGain.connect(filter.frequency);
-osc.connect(filter);
-filter.connect(gainNode);
-gainNode.connect(offlineCtx.destination);
-
-// The instruments MUST be told to stop at the DURATION!
-lfo.start(now);
-osc.start(now);
-lfo.stop(now + DURATION);
-osc.stop(now + DURATION);
+    osc.start(now + (index * 0.05));
+    osc.stop(now + 0.8 + (index * 0.05)); 
+});
 </textarea>
 
         <div class="editor-footer">
@@ -429,8 +412,7 @@ osc.stop(now + DURATION);
             const userCode = document.getElementById('code-input').value;
             const previewSection = document.getElementById('preview-section');
             
-            // --- FIX: Case-Insensitive DURATION Auto-Detection ---
-            // Now reads DURATION, duration, Duration, etc.
+            // Auto-Detects DURATION variable in code
             let duration = 2.0; 
             const durationMatch = userCode.match(/duration\s*=\s*([\d.]+)/i);
             if (durationMatch) {
