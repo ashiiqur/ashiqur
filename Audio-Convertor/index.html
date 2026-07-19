@@ -65,32 +65,33 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* --- Animated Typing Header --- */
+        /* --- Static Header with Subtitle --- */
         .header-container {
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            height: 40px;
+            text-align: center;
         }
 
-        .typing-text {
-            font-size: 32px;
+        .main-title {
+            font-size: 36px;
             font-weight: 700;
-            border-right: 3px solid var(--primary);
-            white-space: nowrap;
-            overflow: hidden;
-            width: 0;
-            animation: typing 2.5s steps(30, end) forwards, blink 0.8s step-end infinite;
+            margin: 0;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            /* Adds a slight metallic shine to the text */
+            background: linear-gradient(135deg, #ffffff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        @keyframes blink {
-            from, to { border-color: transparent; }
-            50% { border-color: var(--primary); }
+        .sub-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 2.5px;
+            margin-top: 8px;
+            text-transform: uppercase;
         }
 
         /* --- Premium Glassmorphism Editor Layout --- */
@@ -110,7 +111,7 @@
             z-index: 10;
         }
 
-        /* NEW: Editor Header and Toolbar Layout */
+        /* Editor Header and Toolbar Layout */
         .editor-header {
             display: flex;
             justify-content: space-between;
@@ -314,13 +315,15 @@
         </ul>
     </div>
 
+    <!-- NEW: Static Header -->
     <div class="header-container">
-        <div class="typing-text">Code to WAV Converter</div>
+        <h1 class="main-title">Code to WAV Converter</h1>
+        <div class="sub-title">Process locally on device</div>
     </div>
 
     <div class="editor-container">
         
-        <!-- NEW: Editor Header with Copy/Paste Toolbar -->
+        <!-- Editor Header with Copy/Paste Toolbar -->
         <div class="editor-header">
             <label>Write Web Audio API JavaScript:</label>
             <div class="toolbar-group">
@@ -372,7 +375,7 @@ freqs.forEach((freq, index) => {
             </div>
             
             <div class="btn-group">
-                <button class="action-btn" id="download-btn" onclick="downloadAudio()">Download WAV</button>
+                <button class="action-btn" id="download-btn" onclick="downloadAudio()">📥 Download WAV</button>
             </div>
         </div>
     </div>
