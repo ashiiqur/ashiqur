@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="favicon.png">
     <title>Quantum p-Subshell</title>
     
     <!-- MathJax Configuration to render the LaTeX formulas -->
@@ -18,24 +17,6 @@
 
     <!-- Page Styling -->
     <style>
-        /* Mobile Responsiveness */
-        @media (max-width: 600px) {
-            body {
-                padding: 1rem; 
-            }
-            
-            .widget-container {
-                padding: 10px; 
-                /* Increase the height so the wrapped slider isn't hidden */
-                height: 550px; 
-                margin: 1rem 0;
-            }
-
-            .insight-box, .merge-section {
-                padding: 1rem; 
-            }
-        }
-        
         :root {
             /* Premium Dark Theme Colors */
             --bg-color: #0a0a0b;        
@@ -134,6 +115,36 @@
 
         p:last-child {
             margin-bottom: 0;
+        }
+
+        /* Mobile Responsiveness & Centered Scaling */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem; 
+            }
+            
+            .widget-container {
+                position: relative; /* Required to center the absolute iframe */
+                padding: 10px; 
+                height: 680px; /* Gives enough vertical space for mobile layout */
+                margin: 1rem 0;
+                overflow: hidden;
+            }
+
+            .widget-iframe {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 100%;
+                height: 100%;
+                /* Perfectly centers and scales down the visual so it fits cleanly */
+                transform: translate(-50%, -50%) scale(0.9);
+                transform-origin: center center;
+            }
+
+            .insight-box, .merge-section {
+                padding: 1rem; 
+            }
         }
     </style>
 </head>
