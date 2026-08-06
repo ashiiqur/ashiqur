@@ -95,7 +95,7 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            counter-reset: custom-counter;
+            /* Removed counter-reset from here */
         }
 
         .topic-list li {
@@ -105,7 +105,7 @@
             background-color: #ffffff;
             border: 1px solid #f0f0f0;
             transition: all 0.2s ease;
-            counter-increment: custom-counter;
+            /* Removed counter-increment from here */
         }
 
         .topic-list li:hover {
@@ -131,7 +131,7 @@
 
         /* Custom Number Badge */
         .topic-list a::before {
-            content: counter(custom-counter);
+            content: attr(data-index); /* Changed to read fixed data-index instead of dynamic counter */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -196,8 +196,17 @@
             const searchInput = document.getElementById('searchInput');
             const topicList = document.getElementById('topicList');
             const listItems = topicList.getElementsByTagName('li');
+            const anchorTags = topicList.getElementsByTagName('a');
             const noResults = document.getElementById('noResults');
 
+            // --- FIX ADDED HERE ---
+            // This loops through all the links exactly once when the page loads 
+            // and permanently assigns their original number to a 'data-index' attribute.
+            for (let i = 0; i < anchorTags.length; i++) {
+                anchorTags[i].setAttribute('data-index', i + 1);
+            }
+
+            // Search logic
             searchInput.addEventListener('input', function() {
                 const filter = this.value.toLowerCase();
                 let visibleCount = 0;
