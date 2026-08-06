@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpg" href="favicon.jpg">
+    <title>Study Materials</title>
+
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --primary-hover: #357ABD;
+            --primary-light: #eaf2fc;
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #f0f0f0;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin: 0 0 6px;
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0 0 28px;
+        }
+
+        /* Search Bar Styling */
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            font-size: 1.1rem;
+            font-family: 'Poppins', sans-serif;
+            border: 2px solid #e1e5eb;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            outline: none;
+            background-color: #fafbfc;
+        }
+
+        .search-container input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.2);
+            background-color: #ffffff;
+        }
+
+        .search-container svg {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            fill: #999;
+        }
+
+        .search-container input:focus + svg { fill: var(--primary-color); }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 22px;
+            font-size: 0.92rem;
+        }
+        .crumb {
+            all: unset;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .crumb.active { color: var(--text-main); cursor: default; }
+        button.crumb:hover { background-color: var(--primary-light); color: var(--primary-color); }
+        .crumb-sep { color: #ccc; padding: 0 2px; }
+
+        /* Shared card list */
+        ul.item-list { list-style: none; padding: 0; margin: 0; }
+        .item-list li {
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .item-list li:not(.is-soon):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: #e1e5eb;
+        }
+
+        /* Nav cards: categories & subjects (things you drill into) */
+        .nav-card {
+            all: unset;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 16px 18px;
+            cursor: pointer;
+            font: inherit;
+            color: var(--text-main);
+        }
+        .nav-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background-color: var(--primary-light);
+            font-size: 1.25rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .nav-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .nav-title { font-weight: 600; font-size: 1.05rem; }
+        .nav-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+        .nav-arrow { font-size: 1.4rem; color: #ccc; margin-left: 10px; transition: transform 0.2s ease, color 0.2s ease; }
+        .item-list li:not(.is-soon):hover .nav-arrow { transform: translateX(3px); color: var(--primary-color); }
+
+        /* Topic links (leaf level - the actual study material) */
+        .topic-link {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .topic-link:hover { color: var(--primary-color); }
+        .topic-badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 35px;
+            height: 35px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .item-list li:not(.is-soon):hover .topic-badge { background-color: var(--primary-hover); }
+
+        /* Coming soon (disabled) topic */
+        .topic-soon { display: flex; align-items: center; padding: 18px 20px; color: #aaa; }
+        .topic-soon .topic-badge { background-color: #d8dde3; }
+        .topic-soon .nav-title { flex: 1; font-weight: 600; font-size: 1.1rem; color: #aaa; margin-right: 10px; }
+        .soon-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            background-color: #eef1f4;
+            color: #999;
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Search result rows (flattened, show their location) */
+        .result-row { display: flex; flex-direction: column; gap: 4px; padding: 14px 20px; }
+        .result-path {
+            all: unset;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .result-path:hover { text-decoration: underline; }
+        .result-name {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        a.result-name:hover { color: var(--primary-color); }
+        .result-name.soon { color: #aaa; }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 0;
+        }
+
+        /* Keyboard focus visibility */
+        .crumb:focus-visible,
+        .nav-card:focus-visible,
+        .result-path:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 20px 12px; }
+            .container { padding: 25px 20px; }
+            h1 { font-size: 1.7rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+            .item-list li:not(.is-soon):hover { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>STUDY MATERIALS</h1>
+        <p class="tagline">Browse a category, or search everything below.</p>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search all topics..." aria-label="Search all topics">
+            <!-- Search Icon -->
+            <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+        </div>
+
+        <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+
+        <div id="content" aria-live="polite"></div>
+    </div>
+
+    <script>
+        /* =========================================================
+           STUDY DATA
+           ---------------------------------------------------------
+           Everything on the page - categories, subjects, and topics -
+           is generated from this one object. Edit it and save; no
+           other code needs to change.
+
+           ADD A CATEGORY
+             "Commerce": { icon: "💰", subjects: {} }
+
+           ADD A SUBJECT  (inside an existing category's "subjects")
+             "Computer Science": []
+
+           ADD A TOPIC  (push into an existing subject's array)
+             { name: "Newton's Laws of Motion", url: "https://..." }
+
+           PLACEHOLDER TOPIC ("coming soon")
+             Use url: "#" and it renders greyed-out and unclickable
+             until you swap in the real link.
+           ========================================================= */
+        const studyData = {
+            "Science": {
+                icon: "🔬",
+                subjects: {
+                    "Physics": [
+                        { name: "Coming soon", url: "#" }
+                    ],
+                    "Chemistry": [
+                        { name: "Quantum p-Subshell", url: "https://ashiqur.cariowns.com/study/Quantum_p-Subshell/" },
+                        { name: "Coming soon", url: "#" }
+                    ],
+                    "Biology": [
+                        { name: "Coming soon", url: "#" }
+                    ],
+                    "Mathematics": [
+                        { name: "Coming soon", url: "#" }
+                    ]
+                }
+            },
+            "Arts": {
+                icon: "🎨",
+                subjects: {
+                    "History": [
+                        { name: "Coming soon", url: "#" }
+                    ],
+                    "Literature": [
+                        { name: "Coming soon", url: "#" }
+                    ]
+                }
+            }
+        };
+        /* ========================================================= */
+
+        // ---------- state ----------
+        let currentCategory = null;
+        let currentSubject = null;
+        let searchQuery = '';
+
+        // ---------- dom refs ----------
+        const searchInput = document.getElementById('searchInput');
+        const breadcrumbEl = document.getElementById('breadcrumb');
+        const contentEl = document.getElementById('content');
+
+        // ---------- escaping (keeps names with &, <, ', " etc. from breaking markup) ----------
+        function escapeHtml(str) {
+            return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        }
+        function escapeAttr(str) {
+            return escapeHtml(str).replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+        }
+        function pluralize(n, word) {
+            return `${n} ${word}${n === 1 ? '' : 's'}`;
+        }
+
+        // ---------- data helpers ----------
+        function allTopicsFlat() {
+            const out = [];
+            for (const catName in studyData) {
+                const subjects = studyData[catName].subjects;
+                for (const subName in subjects) {
+                    subjects[subName].forEach(topic => {
+                        out.push({ category: catName, subject: subName, name: topic.name, url: topic.url });
+                    });
+                }
+            }
+            return out;
+        }
+        function isSoon(topic) {
+            return !topic.url || topic.url === '#';
+        }
+
+        // ---------- navigation ----------
+        function goHome() {
+            currentCategory = null;
+            currentSubject = null;
+            clearSearch();
+            render();
+        }
+        function goToCategory(catName) {
+            currentCategory = catName;
+            currentSubject = null;
+            clearSearch();
+            render();
+        }
+        function goToSubject(catName, subName) {
+            currentCategory = catName;
+            currentSubject = subName;
+            clearSearch();
+            render();
+        }
+        function clearSearch() {
+            searchQuery = '';
+            searchInput.value = '';
+        }
+
+        // ---------- render ----------
+        function render() {
+            renderBreadcrumb();
+            const q = searchQuery.trim();
+            if (q !== '') {
+                renderSearchResults(q.toLowerCase());
+            } else if (currentCategory === null) {
+                renderCategories();
+            } else if (currentSubject === null) {
+                renderSubjects(currentCategory);
+            } else {
+                renderTopics(currentCategory, currentSubject);
+            }
+        }
+
+        function renderBreadcrumb() {
+            if (searchQuery.trim() !== '') {
+                breadcrumbEl.innerHTML = '<span class="crumb active">Search results</span>';
+                return;
+            }
+            const parts = [{ label: '🏠 Home', action: 'home' }];
+            if (currentCategory !== null) parts.push({ label: escapeHtml(currentCategory), action: 'category', cat: currentCategory });
+            if (currentSubject !== null) parts.push({ label: escapeHtml(currentSubject), action: 'subject' });
+
+            breadcrumbEl.innerHTML = parts.map((part, idx) => {
+                const sep = idx > 0 ? '<span class="crumb-sep">›</span>' : '';
+                const isLast = idx === parts.length - 1;
+                if (isLast) return `${sep}<span class="crumb active">${part.label}</span>`;
+                if (part.action === 'home') return `${sep}<button type="button" class="crumb" data-action="home">${part.label}</button>`;
+                return `${sep}<button type="button" class="crumb" data-action="category" data-cat="${escapeAttr(part.cat)}">${part.label}</button>`;
+            }).join('');
+        }
+
+        function renderCategories() {
+            const names = Object.keys(studyData);
+            if (names.length === 0) {
+                contentEl.innerHTML = '<p class="empty-state">No categories yet.</p>';
+                return;
+            }
+            contentEl.innerHTML = `<ul class="item-list">${names.map(catName => {
+                const cat = studyData[catName];
+                const subCount = Object.keys(cat.subjects).length;
+                return `
+                <li>
+                    <button type="button" class="nav-card" data-action="category" data-cat="${escapeAttr(catName)}">
+                        <span class="nav-icon">${cat.icon || escapeHtml(catName.charAt(0))}</span>
+                        <span class="nav-text">
+                            <span class="nav-title">${escapeHtml(catName)}</span>
+                            <span class="nav-sub">${pluralize(subCount, 'subject')}</span>
+                        </span>
+                        <span class="nav-arrow">›</span>
+                    </button>
+                </li>`;
+            }).join('')}</ul>`;
+        }
+
+        function renderSubjects(catName) {
+            const cat = studyData[catName];
+            const subNames = Object.keys(cat.subjects);
+            if (subNames.length === 0) {
+                contentEl.innerHTML = '<p class="empty-state">No subjects yet — check back soon!</p>';
+                return;
+            }
+            contentEl.innerHTML = `<ul class="item-list">${subNames.map(subName => {
+                const topicCount = cat.subjects[subName].length;
+                return `
+                <li>
+                    <button type="button" class="nav-card" data-action="subject" data-cat="${escapeAttr(catName)}" data-sub="${escapeAttr(subName)}">
+                        <span class="nav-icon">${escapeHtml(subName.charAt(0))}</span>
+                        <span class="nav-text">
+                            <span class="nav-title">${escapeHtml(subName)}</span>
+                            <span class="nav-sub">${pluralize(topicCount, 'topic')}</span>
+                        </span>
+                        <span class="nav-arrow">›</span>
+                    </button>
+                </li>`;
+            }).join('')}</ul>`;
+        }
+
+        function renderTopics(catName, subName) {
+            const topics = studyData[catName].subjects[subName];
+            if (topics.length === 0) {
+                contentEl.innerHTML = '<p class="empty-state">No topics yet — check back soon!</p>';
+                return;
+            }
+            contentEl.innerHTML = `<ul class="item-list">${topics.map((topic, i) => {
+                if (isSoon(topic)) {
+                    return `
+                    <li class="is-soon">
+                        <div class="topic-soon" aria-disabled="true">
+                            <span class="topic-badge">${i + 1}</span>
+                            <span class="nav-title">${escapeHtml(topic.name)}</span>
+                            <span class="soon-tag">Coming soon</span>
+                        </div>
+                    </li>`;
+                }
+                return `
+                <li>
+                    <a class="topic-link" href="${escapeAttr(topic.url)}" target="_blank" rel="noopener">
+                        <span class="topic-badge">${i + 1}</span>
+                        ${escapeHtml(topic.name)}
+                    </a>
+                </li>`;
+            }).join('')}</ul>`;
+        }
+
+        function renderSearchResults(query) {
+            const matches = allTopicsFlat().filter(t =>
+                t.name.toLowerCase().includes(query) ||
+                t.subject.toLowerCase().includes(query) ||
+                t.category.toLowerCase().includes(query)
+            );
+            if (matches.length === 0) {
+                contentEl.innerHTML = `<p class="empty-state">No topics found matching "${escapeHtml(query)}".</p>`;
+                return;
+            }
+            contentEl.innerHTML = `<ul class="item-list">${matches.map(topic => {
+                const pathBtn = `<button type="button" class="result-path" data-action="subject" data-cat="${escapeAttr(topic.category)}" data-sub="${escapeAttr(topic.subject)}">${escapeHtml(topic.category)} › ${escapeHtml(topic.subject)}</button>`;
+                if (isSoon(topic)) {
+                    return `
+                    <li class="is-soon">
+                        <div class="result-row" aria-disabled="true">
+                            ${pathBtn}
+                            <span class="result-name soon">${escapeHtml(topic.name)} <span class="soon-tag">Coming soon</span></span>
+                        </div>
+                    </li>`;
+                }
+                return `
+                <li>
+                    <div class="result-row">
+                        ${pathBtn}
+                        <a class="result-name" href="${escapeAttr(topic.url)}" target="_blank" rel="noopener">${escapeHtml(topic.name)}</a>
+                    </div>
+                </li>`;
+            }).join('')}</ul>`;
+        }
+
+        // ---------- events ----------
+        searchInput.addEventListener('input', function() {
+            searchQuery = this.value;
+            render();
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearSearch();
+                render();
+                searchInput.blur();
+            }
+        });
+        document.addEventListener('click', function(e) {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            const action = el.dataset.action;
+            if (action === 'home') goHome();
+            else if (action === 'category') goToCategory(el.dataset.cat);
+            else if (action === 'subject') goToSubject(el.dataset.cat, el.dataset.sub);
+        });
+
+        // ---------- init ----------
+        render();
+    </script>
+
+</body>
+</html>
