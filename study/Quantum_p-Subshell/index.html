@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum p-Subshell</title>
+    
+    <!-- MathJax Configuration to render the LaTeX formulas -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <!-- Page Styling -->
+    <style>
+        :root {
+            /* Premium Dark Theme Colors */
+            --bg-color: #0a0a0b;        
+            --container-bg: #0d0d0d;    /* Deep black matching the simulation's background */
+            --border-color: #333333;    /* The visible outer stroke */
+            --accent-color: #3498db;    
+            --text-main: #f1f5f9;       
+            --text-secondary: #94a3b8;  
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--bg-color);
+        }
+
+        h1 {
+            color: #ffffff;
+            border-bottom: 2px solid #1f1f22;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* The container for your simulation/iframe */
+        .widget-container {
+            width: 100%;
+            height: 600px; 
+            background-color: var(--container-bg); 
+            border: 1px solid var(--border-color); /* The outer stroke */
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            
+            /* The padding creates the gap so the iframe content doesn't touch the edges */
+            padding: 24px; 
+            box-sizing: border-box;
+            
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Iframe styling */
+        .widget-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            overflow: hidden; 
+            background-color: transparent; 
+        }
+
+        /* Insight Box Styling */
+        .insight-box {
+            background-color: rgba(52, 152, 219, 0.1); 
+            border-left: 4px solid var(--accent-color);
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+            color: #e0f2fe;
+        }
+
+        .insight-box strong {
+            color: var(--accent-color);
+        }
+
+        /* Merge Section Styling */
+        .merge-section {
+            background-color: #161618;
+            border: 1px solid #2a2a2d;
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-top: 2rem;
+        }
+
+        .merge-heading {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .star-icon {
+            color: #fbbf24;
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. The Heading -->
+    <h1>Quantum p-Subshell</h1>
+
+    <!-- 2. The Container linking to your file -->
+    <div class="widget-container">
+        <iframe class="widget-iframe" src="Materials/p-orbitals.html" title="Quantum p-Subshell Simulation" scrolling="no"></iframe>
+    </div>
+
+    <!-- 3. The Insight Text -->
+    <div class="insight-box">
+        <strong>Key insight:</strong> This is the exact reason why Noble Gases (like Neon or Argon) are so incredibly stable and unreactive! Their outermost electrons are in completely filled $p$ subshells. Instead of having "pointy" orbitals sticking out in different directions looking to bond, they are surrounded by a perfectly smooth, spherical shield of negative charge.
+    </div>
+
+    <!-- 4. The Star Icon & Merge Text -->
+    <div class="merge-section">
+        <div class="merge-heading">
+            <span class="star-icon">⭐</span> Merge (Adding the Math)
+        </div>
+        
+        <p>In quantum mechanics, an atom doesn't view a full $p$ subshell as three separate, isolated boxes. It experiences one total, combined electron environment.</p>
+        
+        <p>To find the shape of that total environment, we have to mathematically add the individual probability densities together: $\vert{}p_x\vert{}^2 + \vert{}p_y\vert{}^2 + \vert{}p_z\vert{}^2$.</p>
+        
+        <p>When the slider is at zero, the simulation shows you the three orbitals as if they were separate, solid plastic objects (like three balloons tied together in the center).</p>
+        
+        <p>As you increase the Merge slider, the simulation starts performing that mathematical addition, blending them from separate distinct shapes into a single, unified field.</p>
+    </div>
+
+</body>
+</html>
