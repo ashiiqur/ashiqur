@@ -18,6 +18,23 @@
 
     <!-- Page Styling -->
     <style>
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem; /* Reduces outer padding on mobile */
+            }
+            
+            .widget-container {
+                padding: 10px; /* Gives the iframe more horizontal space */
+                height: 450px; /* Optional: adjusts height so it fits on mobile screens better */
+                margin: 1rem 0;
+            }
+
+            .insight-box, .merge-section {
+                padding: 1rem; /* Prevents text boxes from feeling too cramped */
+            }
+        }
+        
         :root {
             /* Premium Dark Theme Colors */
             --bg-color: #0a0a0b;        
